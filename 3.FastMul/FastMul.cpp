@@ -1,13 +1,12 @@
-// FastMul.cpp : Defines the entry point for the console application.
-//
 
-#include "stdafx.h"
-#include "BigInt.h"
+#include <windows.h>
 #include <iostream>
 #include <string>
 #include <algorithm>
 #include <cassert>
-#include <windows.h>
+using namespace std;
+
+#include "BigInt.h"
 
 const int COUNT = 50;
 
@@ -121,9 +120,8 @@ CBigInt Karatsuba(const CBigInt &mul1, const CBigInt &mul2)
 {
     // 1位大整数，直接计算，这也是递归的终止条件
     if ((mul1.GetBigNCount() == 1) || (mul2.GetBigNCount() == 1))
-    {
         return mul1 * mul2;
-    }
+
     // 问题分解
     CBigInt high1, high2, low1, low2;
     unsigned int k = max(mul1.GetBigNCount(), mul2.GetBigNCount()) / 2;
@@ -157,7 +155,7 @@ void TestMul()
     }
 }
 
-int main(int argc, char *argv[])
+int main()
 {
     TestMul();
     return 0;

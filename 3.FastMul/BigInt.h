@@ -1,5 +1,4 @@
-#ifndef __BIG_INT_H__
-#define __BIG_INT_H__
+#pragma once
 
 #include <string>
 
@@ -50,7 +49,7 @@ public:
     CBigInt operator>>(__int64 bits) const;
     const CBigInt &operator>>=(__int64 bits);
 
-    /*大整数位的操作*/
+    // 大整数位的操作
     void GetRightBigN(unsigned int N, CBigInt &rightN);
     int GetBigNCount() const { return m_nLength; };
     bool ShiftLeftBigN(unsigned int N);
@@ -60,7 +59,8 @@ public:
 
     bool TestBit(__int64 bits) const;
     __int64 GetTotalBits() const;
-    /*数据转换接口*/
+
+    // 数据转换接口
     void GetFromString(const char *str, unsigned int system = HEX);
     void PutToString(std::string &str, unsigned int system = HEX);
     void GetLong(unsigned long *values, unsigned int count);
@@ -92,5 +92,3 @@ public:
     // 用数组记录大数在0x100000000进制下每一位的值
     unsigned long m_ulValue[MAX_BI_LEN];
 };
-
-#endif //__BIG_INT_H__

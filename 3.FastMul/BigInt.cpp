@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "BigInt.h"
 
 // 构造大数对象并初始化为零

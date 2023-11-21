@@ -1,100 +1,89 @@
-// chinese_num.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
 #include <string>
 #include <cassert>
-
-//using namespace std;
+using namespace std;
 
 const int CHN_NUM_CHAR_COUNT = 10;
 const int CHN_CHAR_LENGTH = 2;
 
-const char *chnNumChar[CHN_NUM_CHAR_COUNT] = { "Áã", "Ò»", "¶ş", "Èı", "ËÄ", "Îå", "Áù", "Æß", "°Ë", "¾Å" };
-const char *chnUnitChar[] = { "", "Ê®", "°Ù", "Ç§" };
-const char *chnUnitSection[] = { "", "Íò", "ÒÚ", "ÍòÒÚ" };
+const char *chnNumChar[CHN_NUM_CHAR_COUNT] = {"é›¶", "ä¸€", "äºŒ", "ä¸‰", "å››", "äº”", "å…­", "ä¸ƒ", "å…«", "ä¹"};
+const char *chnUnitChar[] = {"", "å", "ç™¾", "åƒ"};
+const char *chnUnitSection[] = {"", "ä¸‡", "äº¿", "ä¸‡äº¿"};
 
-typedef struct 
+typedef struct
 {
-    const char *name; //ÖĞÎÄÈ¨Î»Ãû³Æ
-    int value; //10µÄ±¶ÊıÖµ
-    bool secUnit; //ÊÇ·ñÊÇ½ÚÈ¨Î»
-}CHN_NAME_VALUE;
+    const char *name; // ä¸­æ–‡æƒä½åç§°
+    int value;        // 10çš„å€æ•°å€¼
+    bool secUnit;     // æ˜¯å¦æ˜¯èŠ‚æƒä½
+} CHN_NAME_VALUE;
 
-CHN_NAME_VALUE chnValuePair[] = 
-{
-    { "Ê®", 10, false }, { "°Ù", 100, false }, { "Ç§", 1000, false }, 
-    { "Íò", 10000, true }, { "ÒÚ", 100000000, true }
-};
+CHN_NAME_VALUE chnValuePair[] = {{"å", 10, false}, {"ç™¾", 100, false}, {"åƒ", 1000, false}, {"ä¸‡", 10000, true}, {"äº¿", 100000000, true}};
 
-
-
-void SectionToChinese(unsigned int section, std::string& chnStr)
+void SectionToChinese(unsigned int section, string &chnStr)
 {
     chnStr.clear();
-    std::string strIns;
+    string strIns;
     int unitPos = 0;
     bool zero = true;
-    while(section > 0)
+    while (section > 0)
     {
         int v = section % 10;
-        if(v == 0)
+        if (v == 0)
         {
-            if( (section == 0) || !zero )
+            if ((section == 0) || !zero)
             {
-                zero = true; /*ĞèÒª²¹0£¬zeroµÄ×÷ÓÃÊÇÈ·±£¶ÔÁ¬ĞøµÄ¶à¸ö0£¬Ö»²¹Ò»¸öÖĞÎÄÁã*/
+                zero = true; /*éœ€è¦è¡¥0ï¼Œzeroçš„ä½œç”¨æ˜¯ç¡®ä¿å¯¹è¿ç»­çš„å¤šä¸ª0ï¼Œåªè¡¥ä¸€ä¸ªä¸­æ–‡é›¶*/
                 chnStr.insert(0, chnNumChar[v]);
             }
         }
         else
         {
-            zero = false; //ÖÁÉÙÓĞÒ»¸öÊı×Ö²»ÊÇ0
-            strIns = chnNumChar[v]; //´ËÎ»¶ÔÓ¦µÄÖĞÎÄÊı×Ö
-            strIns += chnUnitChar[unitPos]; //´ËÎ»¶ÔÓ¦µÄÖĞÎÄÈ¨Î»
-            chnStr.insert(0, strIns); 
+            zero = false;                   // è‡³å°‘æœ‰ä¸€ä¸ªæ•°å­—ä¸æ˜¯0
+            strIns = chnNumChar[v];         // æ­¤ä½å¯¹åº”çš„ä¸­æ–‡æ•°å­—
+            strIns += chnUnitChar[unitPos]; // æ­¤ä½å¯¹åº”çš„ä¸­æ–‡æƒä½
+            chnStr.insert(0, strIns);
         }
-        unitPos++; //ÒÆÎ»
+        unitPos++; // ç§»ä½
         section = section / 10;
     }
 }
 
-//num == 0ĞèÒªÌØÊâ´¦Àí£¬Ö±½Ó·µ»Ø"Áã"
-void NumberToChinese(unsigned int num, std::string& chnStr)
+// num == 0éœ€è¦ç‰¹æ®Šå¤„ç†ï¼Œç›´æ¥è¿”å›"é›¶"
+void NumberToChinese(unsigned int num, string &chnStr)
 {
     chnStr.clear();
     int unitPos = 0;
-    std::string strIns;
+    string strIns;
     bool needZero = false;
 
-    if(num == 0)
+    if (num == 0)
     {
         chnStr = chnNumChar[0];
         return;
     }
 
-    while(num > 0)
+    while (num > 0)
     {
         unsigned int section = num % 10000;
-        if(needZero)
+        if (needZero)
         {
             chnStr.insert(0, chnNumChar[0]);
         }
         SectionToChinese(section, strIns);
-        /*ÊÇ·ñĞèÒª½ÚÈ¨Î»£¿*/
-        strIns += (section != 0) ? chnUnitSection[unitPos] : chnUnitSection[0]; 
+        /*æ˜¯å¦éœ€è¦èŠ‚æƒä½ï¼Ÿ*/
+        strIns += (section != 0) ? chnUnitSection[unitPos] : chnUnitSection[0];
         chnStr.insert(0, strIns);
-        /*Ç§Î»ÊÇ0£¿ĞèÒªÔÚÏÂÒ»¸ösection²¹Áã*/
-        needZero = (section < 1000) && (section > 0); 
+        /*åƒä½æ˜¯0ï¼Ÿéœ€è¦åœ¨ä¸‹ä¸€ä¸ªsectionè¡¥é›¶*/
+        needZero = (section < 1000) && (section > 0);
         num = num / 10000;
         unitPos++;
     }
 }
 
-int ChineseToValue(const std::string& chnStr)
+int ChineseToValue(const string &chnStr)
 {
-    for(int val = 0; val < sizeof(chnNumChar) / sizeof(chnNumChar[0]); val++)
+    for (int val = 0; val < sizeof(chnNumChar) / sizeof(chnNumChar[0]); val++)
     {
-        if(chnStr.compare(chnNumChar[val]) == 0)
+        if (chnStr.compare(chnNumChar[val]) == 0)
         {
             return val;
         }
@@ -103,11 +92,11 @@ int ChineseToValue(const std::string& chnStr)
     return -1;
 }
 
-int ChineseToUnit(const std::string& chnStr, bool& secUnit)
+int ChineseToUnit(const string &chnStr, bool &secUnit)
 {
-    for(int unit = 0; unit < sizeof(chnValuePair) / sizeof(chnValuePair[0]); unit++)
+    for (int unit = 0; unit < sizeof(chnValuePair) / sizeof(chnValuePair[0]); unit++)
     {
-        if(chnStr.compare(chnValuePair[unit].name) == 0)
+        if (chnStr.compare(chnValuePair[unit].name) == 0)
         {
             secUnit = chnValuePair[unit].secUnit;
             return chnValuePair[unit].value;
@@ -117,22 +106,22 @@ int ChineseToUnit(const std::string& chnStr, bool& secUnit)
     return 1;
 }
 
-unsigned int ChineseToNumber(const std::string& chnString)
+unsigned int ChineseToNumber(const string &chnString)
 {
     unsigned int rtn = 0;
     unsigned int section = 0;
     int number = 0;
     bool secUnit = false;
-    std::string::size_type pos = 0;
-    
-    while(pos < chnString.length())
+    string::size_type pos = 0;
+
+    while (pos < chnString.length())
     {
         int num = ChineseToValue(chnString.substr(pos, CHN_CHAR_LENGTH));
-        if(num >= 0) /*Êı×Ö»¹ÊÇµ¥Î»£¿*/
+        if (num >= 0) /*æ•°å­—è¿˜æ˜¯å•ä½ï¼Ÿ*/
         {
             number = num;
             pos += CHN_CHAR_LENGTH;
-            if(pos >= chnString.length())//Èç¹ûÊÇ×îºóÒ»Î»Êı×Ö£¬Ö±½Ó½áÊø
+            if (pos >= chnString.length()) // å¦‚æœæ˜¯æœ€åä¸€ä½æ•°å­—ï¼Œç›´æ¥ç»“æŸ
             {
                 section += number;
                 rtn += section;
@@ -142,7 +131,7 @@ unsigned int ChineseToNumber(const std::string& chnString)
         else
         {
             int unit = ChineseToUnit(chnString.substr(pos, CHN_CHAR_LENGTH), secUnit);
-            if(secUnit)//ÊÇ½ÚÈ¨Î»ËµÃ÷Ò»¸ö½ÚÒÑ¾­½áÊø
+            if (secUnit) // æ˜¯èŠ‚æƒä½è¯´æ˜ä¸€ä¸ªèŠ‚å·²ç»ç»“æŸ
             {
                 section = (section + number) * unit;
                 rtn += section;
@@ -154,7 +143,7 @@ unsigned int ChineseToNumber(const std::string& chnString)
             }
             number = 0;
             pos += CHN_CHAR_LENGTH;
-            if(pos >= chnString.length())
+            if (pos >= chnString.length())
             {
                 rtn += section;
                 break;
@@ -165,60 +154,59 @@ unsigned int ChineseToNumber(const std::string& chnString)
     return rtn;
 }
 
-typedef struct 
+typedef struct
 {
     int num;
     const char *chnNumStr;
-}TEST_DATA;
+} TEST_DATA;
 
-TEST_DATA testPair[] = 
-{
-    {0, "Áã"},
-    {1, "Ò»"},
-    {2, "¶ş"},
-    {3, "Èı"},
-    {4, "ËÄ"},
-    {5, "Îå"},
-    {6, "Áù"},
-    {7, "Æß"},
-    {8, "°Ë"},
-    {9, "¾Å"},
-    {10, "Ò»Ê®"},
-    {11, "Ò»Ê®Ò»"},
-    {110, "Ò»°ÙÒ»Ê®"},
-    {111, "Ò»°ÙÒ»Ê®Ò»"},
-    {100, "Ò»°Ù"},
-    {102, "Ò»°ÙÁã¶ş"},
-    {1020, "Ò»Ç§Áã¶şÊ®"},
-    {1001, "Ò»Ç§ÁãÒ»"},
-    {1015, "Ò»Ç§ÁãÒ»Ê®Îå"},
-    {1000, "Ò»Ç§"},
-    {10000, "Ò»Íò"},
-    {20010, "¶şÍòÁãÒ»Ê®"},
-    {20001, "¶şÍòÁãÒ»"},
-    {100000, "Ò»Ê®Íò"},
-    {1000000, "Ò»°ÙÍò"},
-    {10000000, "Ò»Ç§Íò"},
-    {100000000, "Ò»ÒÚ"},
-    {1000000000, "Ò»Ê®ÒÚ"},
-    {1000001000, "Ò»Ê®ÒÚÒ»Ç§"},
-    {1000000100, "Ò»Ê®ÒÚÁãÒ»°Ù"},
-    {200010, "¶şÊ®ÍòÁãÒ»Ê®"},
-    {2000105, "¶ş°ÙÍòÁãÒ»°ÙÁãÎå"},
-    {20001007, "¶şÇ§ÍòÒ»Ç§ÁãÆß"},
-    {2000100190, "¶şÊ®ÒÚÁãÒ»Ê®ÍòÁãÒ»°Ù¾ÅÊ®"},
-    {1040010000, "Ò»Ê®ÒÚËÄÇ§ÁãÒ»Íò"},
-    {200012301, "¶şÒÚÁãÒ»Íò¶şÇ§Èı°ÙÁãÒ»"},
-    {2005010010, "¶şÊ®ÒÚÁãÎå°ÙÁãÒ»ÍòÁãÒ»Ê®"},
-    {4009060200, "ËÄÊ®ÒÚÁã¾Å°ÙÁãÁùÍòÁã¶ş°Ù"},
-    {4294967295, "ËÄÊ®¶şÒÚ¾ÅÇ§ËÄ°Ù¾ÅÊ®ÁùÍòÆßÇ§¶ş°Ù¾ÅÊ®Îå"}
-};
+TEST_DATA testPair[] =
+    {
+        {0, "é›¶"},
+        {1, "ä¸€"},
+        {2, "äºŒ"},
+        {3, "ä¸‰"},
+        {4, "å››"},
+        {5, "äº”"},
+        {6, "å…­"},
+        {7, "ä¸ƒ"},
+        {8, "å…«"},
+        {9, "ä¹"},
+        {10, "ä¸€å"},
+        {11, "ä¸€åä¸€"},
+        {110, "ä¸€ç™¾ä¸€å"},
+        {111, "ä¸€ç™¾ä¸€åä¸€"},
+        {100, "ä¸€ç™¾"},
+        {102, "ä¸€ç™¾é›¶äºŒ"},
+        {1020, "ä¸€åƒé›¶äºŒå"},
+        {1001, "ä¸€åƒé›¶ä¸€"},
+        {1015, "ä¸€åƒé›¶ä¸€åäº”"},
+        {1000, "ä¸€åƒ"},
+        {10000, "ä¸€ä¸‡"},
+        {20010, "äºŒä¸‡é›¶ä¸€å"},
+        {20001, "äºŒä¸‡é›¶ä¸€"},
+        {100000, "ä¸€åä¸‡"},
+        {1000000, "ä¸€ç™¾ä¸‡"},
+        {10000000, "ä¸€åƒä¸‡"},
+        {100000000, "ä¸€äº¿"},
+        {1000000000, "ä¸€åäº¿"},
+        {1000001000, "ä¸€åäº¿ä¸€åƒ"},
+        {1000000100, "ä¸€åäº¿é›¶ä¸€ç™¾"},
+        {200010, "äºŒåä¸‡é›¶ä¸€å"},
+        {2000105, "äºŒç™¾ä¸‡é›¶ä¸€ç™¾é›¶äº”"},
+        {20001007, "äºŒåƒä¸‡ä¸€åƒé›¶ä¸ƒ"},
+        {2000100190, "äºŒåäº¿é›¶ä¸€åä¸‡é›¶ä¸€ç™¾ä¹å"},
+        {1040010000, "ä¸€åäº¿å››åƒé›¶ä¸€ä¸‡"},
+        {200012301, "äºŒäº¿é›¶ä¸€ä¸‡äºŒåƒä¸‰ç™¾é›¶ä¸€"},
+        {2005010010, "äºŒåäº¿é›¶äº”ç™¾é›¶ä¸€ä¸‡é›¶ä¸€å"},
+        {4009060200, "å››åäº¿é›¶ä¹ç™¾é›¶å…­ä¸‡é›¶äºŒç™¾"},
+        {4294967295, "å››åäºŒäº¿ä¹åƒå››ç™¾ä¹åå…­ä¸‡ä¸ƒåƒäºŒç™¾ä¹åäº”"}};
 
 void testNumberToChinese()
 {
-    std::string chnNum;
+    string chnNum;
 
-    for(int i = 0; i < sizeof(testPair)/sizeof(testPair[0]); i++)
+    for (int i = 0; i < sizeof(testPair) / sizeof(testPair[0]); i++)
     {
         NumberToChinese(testPair[i].num, chnNum);
         assert(strcmp(chnNum.c_str(), testPair[i].chnNumStr) == 0);
@@ -227,17 +215,16 @@ void testNumberToChinese()
 
 void testChineseToNumber()
 {
-    for(int i = 0; i < sizeof(testPair)/sizeof(testPair[0]); i++)
+    for (int i = 0; i < sizeof(testPair) / sizeof(testPair[0]); i++)
     {
         unsigned int num = ChineseToNumber(testPair[i].chnNumStr);
         assert(num == testPair[i].num);
     }
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     testNumberToChinese();
     testChineseToNumber();
-	return 0;
+    return 0;
 }
-

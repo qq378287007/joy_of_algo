@@ -1,7 +1,3 @@
-// dp.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -11,7 +7,7 @@ const int MAX_STRING_LEN = 50;
 
 // #define min(a, b)  (((a) < (b)) ? (a) : (b))
 
-typedef struct tagMemoRecord
+typedef struct
 {
     int distance;
     int refCount;

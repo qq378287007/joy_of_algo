@@ -1,7 +1,3 @@
-// bayes.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
 #include <algorithm>
 #include <iostream>
 #include <iterator>
@@ -10,78 +6,72 @@
 #include <set>
 #include <map>
 #include <numeric>
+#include <cmath>
+#include <cfloat>
+using namespace std;
 
 typedef struct
 {
     int count;
     int totalWords;
-    std::vector<int> wordsNum;
+    vector<int> wordsNum;
     double pci;
-    std::vector<double> pfci;
-}TRAINING_T;
+    vector<double> pfci;
+} TRAINING_T;
 
-typedef std::pair<std::vector<std::string>, std::string>   EXAMPLE_T;
-typedef std::map<std::string, TRAINING_T>  TRAINING_RESULT;
+typedef pair<vector<string>, string> EXAMPLE_T;
+typedef map<string, TRAINING_T> TRAINING_RESULT;
 
-//ÈË¹¤·ÖÀàºÃµÄÑù±¾Êı¾İ
-std::vector<EXAMPLE_T>  examples =
-{
-    { { "ÖÜÁù", "¹«Ë¾", "Çì×£", "¾Û²Í", "Ê±¼ä", "¶©²Í" }, "ÆÕÍ¨ÓÊ¼ş" },
-    { { "Ï²»¶", "¸ÅÂÊÂÛ", "¿¼ÊÔ", "ÑĞ¾¿", "¼°¸ñ", "²¹¿¼", "Ê§°Ü" }, "ÆÕÍ¨ÓÊ¼ş" },
-    { { "±´Ò¶Ë¹", "ÀíÂÛ", "Ëã·¨", "¹«Ê½", "À§ÄÑ" }, "ÆÕÍ¨ÓÊ¼ş" },
-    { { "ÉÏº£", "ÇçÀÊ", "½¼ÓÎ", "Çà²İ", "À¶Ìì", "ÕÊÅñ", "Í£³µ³¡", "Óµ¶Â" }, "ÆÕÍ¨ÓÊ¼ş" },
-    { { "´úÂë", "×ß²é", "´íÎó", "·´À¡", "ĞŞ¸Ä", "Èë¿â", "±àÒë" }, "ÆÕÍ¨ÓÊ¼ş" },
-    { { "¹«Ë¾", "µ¥Ôª²âÊÔ", "¸²¸ÇÂÊ", "Ê±¼ä", "ÓÃÀı", "Ê§°Ü", "³É¹¦" }, "ÆÕÍ¨ÓÊ¼ş" },
-    { { "ÓÅ»İ", "´òÕÛ", "´ÙÏú", "·µÀû", "½ğÈÚ", "Àí²Æ" }, "À¬»øÓÊ¼ş" },
-    { { "¹«Ë¾", "·¢Æ±", "Ë°µã", "ÓÅ»İ", "ÔöÖµË°", "·µÀû" }, "À¬»øÓÊ¼ş" },
-    { { "³é½±", "ÖĞ½±", "µã»÷", "¹§Ï²", "ÉêÇë", "×Ê¸ñ" }, "À¬»øÓÊ¼ş" },
-    { { "±¬¿î", "ÃëÉ±", "´òÕÛ", "µÖÓÃÈ¯", "ÌØ»İ" }, "À¬»øÓÊ¼ş" },
-    { { "ÕĞÆ¸", "¼æÖ°", "ÈÕĞ½", "ĞÅÓÃ", "ºÏ×÷" }, "À¬»øÓÊ¼ş" },
-    { { "´û¿î", "×Ê½ğ", "µ£±£", "µÖÑº", "Ğ¡¶î", "ÀûÏ¢" }, "À¬»øÓÊ¼ş" },
-    { { "Õı¹æ", "·¢Æ±", "Ë°Îñ¾Ö", "ÑéÖ¤", "×ÉÑ¯", "´òÕÛ" }, "À¬»øÓÊ¼ş" },
-    { { "³ÏÒâ", "ºÏ×÷", "ÌØ¼Û", "»úÆ±", "»¶Ó­", "×ÉÑ¯" }, "À¬»øÓÊ¼ş" }
-};
-
-
-
-std::vector<int> MakeWordsVec(const std::vector<std::string>& allWords, const std::vector<std::string>& words)
-{
-    std::vector<int> wordVec(allWords.size(), 0);
-
-    for (auto& word : words)
+// äººå·¥åˆ†ç±»å¥½çš„æ ·æœ¬æ•°æ®
+vector<EXAMPLE_T> examples =
     {
-        auto it = std::find(allWords.begin(), allWords.end(), word);
+        {{"å‘¨å…­", "å…¬å¸", "åº†ç¥", "èšé¤", "æ—¶é—´", "è®¢é¤"}, "æ™®é€šé‚®ä»¶"},
+        {{"å–œæ¬¢", "æ¦‚ç‡è®º", "è€ƒè¯•", "ç ”ç©¶", "åŠæ ¼", "è¡¥è€ƒ", "å¤±è´¥"}, "æ™®é€šé‚®ä»¶"},
+        {{"è´å¶æ–¯", "ç†è®º", "ç®—æ³•", "å…¬å¼", "å›°éš¾"}, "æ™®é€šé‚®ä»¶"},
+        {{"ä¸Šæµ·", "æ™´æœ—", "éƒŠæ¸¸", "é’è‰", "è“å¤©", "å¸ç¯·", "åœè½¦åœº", "æ‹¥å µ"}, "æ™®é€šé‚®ä»¶"},
+        {{"ä»£ç ", "èµ°æŸ¥", "é”™è¯¯", "åé¦ˆ", "ä¿®æ”¹", "å…¥åº“", "ç¼–è¯‘"}, "æ™®é€šé‚®ä»¶"},
+        {{"å…¬å¸", "å•å…ƒæµ‹è¯•", "è¦†ç›–ç‡", "æ—¶é—´", "ç”¨ä¾‹", "å¤±è´¥", "æˆåŠŸ"}, "æ™®é€šé‚®ä»¶"},
+        {{"ä¼˜æƒ ", "æ‰“æŠ˜", "ä¿ƒé”€", "è¿”åˆ©", "é‡‘è", "ç†è´¢"}, "åƒåœ¾é‚®ä»¶"},
+        {{"å…¬å¸", "å‘ç¥¨", "ç¨ç‚¹", "ä¼˜æƒ ", "å¢å€¼ç¨", "è¿”åˆ©"}, "åƒåœ¾é‚®ä»¶"},
+        {{"æŠ½å¥–", "ä¸­å¥–", "ç‚¹å‡»", "æ­å–œ", "ç”³è¯·", "èµ„æ ¼"}, "åƒåœ¾é‚®ä»¶"},
+        {{"çˆ†æ¬¾", "ç§’æ€", "æ‰“æŠ˜", "æŠµç”¨åˆ¸", "ç‰¹æƒ "}, "åƒåœ¾é‚®ä»¶"},
+        {{"æ‹›è˜", "å…¼èŒ", "æ—¥è–ª", "ä¿¡ç”¨", "åˆä½œ"}, "åƒåœ¾é‚®ä»¶"},
+        {{"è´·æ¬¾", "èµ„é‡‘", "æ‹…ä¿", "æŠµæŠ¼", "å°é¢", "åˆ©æ¯"}, "åƒåœ¾é‚®ä»¶"},
+        {{"æ­£è§„", "å‘ç¥¨", "ç¨åŠ¡å±€", "éªŒè¯", "å’¨è¯¢", "æ‰“æŠ˜"}, "åƒåœ¾é‚®ä»¶"},
+        {{"è¯šæ„", "åˆä½œ", "ç‰¹ä»·", "æœºç¥¨", "æ¬¢è¿", "å’¨è¯¢"}, "åƒåœ¾é‚®ä»¶"}};
+
+vector<int> MakeWordsVec(const vector<string> &allWords, const vector<string> &words)
+{
+    vector<int> wordVec(allWords.size(), 0);
+    for (auto &word : words)
+    {
+        auto it = find(allWords.begin(), allWords.end(), word);
         if (it != allWords.end())
-        {
             wordVec[it - allWords.begin()] += 1;
-        }
     }
-
-    return std::move(wordVec);
+    return move(wordVec);
 }
 
-std::vector<std::string> MakeAllWordsList(const std::vector<EXAMPLE_T>& examples)
+vector<string> MakeAllWordsList(const vector<EXAMPLE_T> &examples)
 {
-    std::set<std::string> wordsSet;
-    for (auto& e : examples)
-    {
+    set<string> wordsSet;
+    for (auto &e : examples)
         wordsSet.insert(e.first.begin(), e.first.end());
-    }
 
-    std::vector<std::string> wordsList;
-    std::copy(wordsSet.begin(), wordsSet.end(), std::back_inserter(wordsList));
-    return std::move(wordsList);
+    vector<string> wordsList;
+    copy(wordsSet.begin(), wordsSet.end(), back_inserter(wordsList));
+    return move(wordsList);
 }
 
-TRAINING_T& GetTrainClassificationDate(TRAINING_RESULT& tr, const std::string& classification, std::size_t vecLen)
+TRAINING_T &GetTrainClassificationDate(TRAINING_RESULT &tr, const string &classification, size_t vecLen)
 {
     auto it = tr.find(classification);
     if (it == tr.end())
     {
         tr[classification].count = 1;
-        tr[classification].totalWords = 2; //³õÊ¼»¯Îª2£¬±ÜÃâ³ı0
-        tr[classification].wordsNum = std::vector<int>(vecLen, 1); //³õÊ¼»¯Îª1
-        tr[classification].pfci = std::vector<double>(vecLen);
+        tr[classification].totalWords = 2;                    // åˆå§‹åŒ–ä¸º2ï¼Œé¿å…é™¤0
+        tr[classification].wordsNum = vector<int>(vecLen, 1); // åˆå§‹åŒ–ä¸º1
+        tr[classification].pfci = vector<double>(vecLen);
     }
     else
     {
@@ -91,46 +81,41 @@ TRAINING_T& GetTrainClassificationDate(TRAINING_RESULT& tr, const std::string& c
     return tr[classification];
 }
 
-TRAINING_RESULT TrainingExample(const std::vector<std::string>& allWords, const std::vector<EXAMPLE_T>& examples)
+TRAINING_RESULT TrainingExample(const vector<string> &allWords, const vector<EXAMPLE_T> &examples)
 {
     TRAINING_RESULT tr;
 
-    for (auto& e : examples)
+    for (auto &e : examples)
     {
-        TRAINING_T& tt = GetTrainClassificationDate(tr, e.second, allWords.size());
-        std::vector<int> wordNum = MakeWordsVec(allWords, e.first);
-        tt.totalWords += std::accumulate(wordNum.begin(), wordNum.end(), 0);
-        std::transform(wordNum.begin(), wordNum.end(), tt.wordsNum.begin(), 
-                       tt.wordsNum.begin(), std::plus<int>());
+        TRAINING_T &tt = GetTrainClassificationDate(tr, e.second, allWords.size());
+        vector<int> wordNum = MakeWordsVec(allWords, e.first);
+        tt.totalWords += accumulate(wordNum.begin(), wordNum.end(), 0);
+        transform(wordNum.begin(), wordNum.end(), tt.wordsNum.begin(), tt.wordsNum.begin(), plus<int>());
     }
 
-    for (auto& cr : tr)
+    for (auto &cr : tr)
     {
         cr.second.pci = double(cr.second.count) / examples.size();
-        for (std::size_t i = 0; i < allWords.size(); i++)
-        {
-            cr.second.pfci[i] = std::log(double(cr.second.wordsNum[i]) / cr.second.totalWords);
-        }
+        for (size_t i = 0; i < allWords.size(); i++)
+            cr.second.pfci[i] = log(double(cr.second.wordsNum[i]) / cr.second.totalWords);
     }
-    
-    return std::move(tr);
+
+    return move(tr);
 }
 
-std::string ClassifyResult(const TRAINING_RESULT& tr, const std::vector<std::string>& allWords, 
-                           const std::vector<std::string>& wordsList)
+string ClassifyResult(const TRAINING_RESULT &tr, const vector<string> &allWords,
+                      const vector<string> &wordsList)
 {
     double pm = -DBL_MAX;
-    std::string classification;
+    string classification;
 
-    std::vector<int> numVec = MakeWordsVec(allWords, wordsList);
-    for (auto& cr : tr)
+    vector<int> numVec = MakeWordsVec(allWords, wordsList);
+    for (auto &cr : tr)
     {
         double p = 0.0;
-        for (std::size_t i = 0; i < allWords.size(); i++)
-        {
+        for (size_t i = 0; i < allWords.size(); i++)
             p += numVec[i] * cr.second.pfci[i];
-        }
-        p += std::log(cr.second.pci);
+        p += log(cr.second.pci);
         if (p > pm)
         {
             pm = p;
@@ -143,24 +128,24 @@ std::string ClassifyResult(const TRAINING_RESULT& tr, const std::vector<std::str
 
 int main()
 {
-    std::vector<std::string> allWords = MakeAllWordsList(examples);
+    vector<string> allWords = MakeAllWordsList(examples);
 
     TRAINING_RESULT tr = TrainingExample(allWords, examples);
 
+    // vector<string> testWords = { "å…¬å¸", "è®¨è®º", "å•å…ƒæµ‹è¯•", "è¦†ç›–ç‡", "é”™è¯¯", "æˆåŠŸ" };
+    vector<string> testWords = {"å…¬å¸", "ä¿é™©", "è®¨è®º", "å–œæ¬¢", "å‘¨å…­", "éƒŠæ¸¸", "è“å¤©"};
+    string classification = ClassifyResult(tr, allWords, testWords);
+    cout << "[";
+    copy(testWords.begin(), testWords.end(), ostream_iterator<string>(cout, " "));
+    cout << "] è¢«åˆ†ç±»ä¸ºï¼š " << classification << endl
+         << endl;
 
-    //std::vector<std::string> testWords = { "¹«Ë¾", "ÌÖÂÛ", "µ¥Ôª²âÊÔ", "¸²¸ÇÂÊ", "´íÎó", "³É¹¦" };
-    std::vector<std::string> testWords = { "¹«Ë¾", "±£ÏÕ", "ÌÖÂÛ", "Ï²»¶", "ÖÜÁù", "½¼ÓÎ", "À¶Ìì" };
-    std::string classification = ClassifyResult(tr, allWords, testWords);
-    std::cout << "[";
-    std::copy(testWords.begin(), testWords.end(), std::ostream_iterator<std::string>(std::cout, " "));
-    std::cout << "] ±»·ÖÀàÎª£º " << classification << std::endl << std::endl;
-
-    std::vector<std::string> testWords2 = { "¹«Ë¾", "ÓÅ»İ", "´òÕÛ", "ÃëÉ±", "Ï²»¶", "ºÏ×÷" };
-    std::string classification2 = ClassifyResult(tr, allWords, testWords2);
-    std::cout << "[";
-    std::copy(testWords2.begin(), testWords2.end(), std::ostream_iterator<std::string>(std::cout, " "));
-    std::cout << "] ±»·ÖÀàÎª£º " << classification2 << std::endl << std::endl;
+    vector<string> testWords2 = {"å…¬å¸", "ä¼˜æƒ ", "æ‰“æŠ˜", "ç§’æ€", "å–œæ¬¢", "åˆä½œ"};
+    string classification2 = ClassifyResult(tr, allWords, testWords2);
+    cout << "[";
+    copy(testWords2.begin(), testWords2.end(), ostream_iterator<string>(cout, " "));
+    cout << "] è¢«åˆ†ç±»ä¸ºï¼š " << classification2 << endl
+         << endl;
 
     return 0;
 }
-

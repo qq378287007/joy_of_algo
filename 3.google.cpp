@@ -114,7 +114,6 @@ void OnCharListReady(CHAR_ITEM ci[max_char_count])
 
 int main(int argc, char *argv[])
 {
-
     CHAR_ITEM char_item[max_char_count] = {{'W', -1, true}, {'D', -1, true}, {'O', -1, false}, {'T', -1, false}, {'G', -1, true}, {'L', -1, false}, {'E', -1, false}, {'C', -1, false}, {'M', -1, false}};
     /*
         CHAR_ITEM char_item[max_char_count] = { {'A', -1, true}, {'B', -1, true}, {'C', -1, true},
