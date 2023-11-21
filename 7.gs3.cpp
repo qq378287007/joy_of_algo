@@ -1,18 +1,13 @@
-// gs3.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
-
 const int UNIT_COUNT = 5;
 
 typedef struct tagPartner
 {
-    char *name;   //Ãû×Ö
-    int next;     //ÏÂÒ»¸öÑûÇë¶ÔÏó
-    int current;  //µ±Ç°Îè°é£¬-1±íÊ¾»¹Ã»ÓĞÎè°é
-    int pCount; //Æ«°®ÁĞ±íÖĞÎè°é¸öÊı
-    int perfect[UNIT_COUNT]; //Æ«°®ÁĞ±í
-}PARTNER;
+    char *name;              // åå­—
+    int next;                // ä¸‹ä¸€ä¸ªé‚€è¯·å¯¹è±¡
+    int current;             // å½“å‰èˆä¼´ï¼Œ-1è¡¨ç¤ºè¿˜æ²¡æœ‰èˆä¼´
+    int pCount;              // åçˆ±åˆ—è¡¨ä¸­èˆä¼´ä¸ªæ•°
+    int perfect[UNIT_COUNT]; // åçˆ±åˆ—è¡¨
+} PARTNER;
 
 typedef struct tagMaxMatch
 {
@@ -20,35 +15,31 @@ typedef struct tagMaxMatch
     bool on_path[UNIT_COUNT];
     int path[UNIT_COUNT];
     int max_match;
-}GRAPH_MATCH;
+} GRAPH_MATCH;
 
-
-PARTNER X[] = 
-{
-    {"X1", 0, -1, 1, {2} },
-    {"X2", 0, -1, 2, {0,1} },
-    {"X3", 0, -1, 3, {1,2,3} },
-    {"X4", 0, -1, 2, {1,2} },
-    {"X5", 0, -1, 3, {2,3,4} }
-};
-PARTNER Y[] = 
-{
-    {"Y1", 0, -1, 1, {1} },
-    {"Y2", 0, -1, 3, {1,2,3} },
-    {"Y3", 0, -1, 4, {0,2,3,4} },
-    {"Y4", 0, -1, 2, {2,4} },
-    {"Y5", 0, -1, 1, {4} }
-};
+PARTNER X[] =
+    {
+        {"X1", 0, -1, 1, {2}},
+        {"X2", 0, -1, 2, {0, 1}},
+        {"X3", 0, -1, 3, {1, 2, 3}},
+        {"X4", 0, -1, 2, {1, 2}},
+        {"X5", 0, -1, 3, {2, 3, 4}}};
+PARTNER Y[] =
+    {
+        {"Y1", 0, -1, 1, {1}},
+        {"Y2", 0, -1, 3, {1, 2, 3}},
+        {"Y3", 0, -1, 4, {0, 2, 3, 4}},
+        {"Y4", 0, -1, 2, {2, 4}},
+        {"Y5", 0, -1, 1, {4}}};
 
 bool FindAugmentPath(GRAPH_MATCH *match, int xi)
 {
-    for(int yj = 0; yj < UNIT_COUNT; yj++)
+    for (int yj = 0; yj < UNIT_COUNT; yj++)
     {
-        if((match->edge[xi][yj] == 1) && !match->on_path[yj])
+        if ((match->edge[xi][yj] == 1) && !match->on_path[yj])
         {
             match->on_path[yj] = true;
-            if( (match->path[yj] == -1) 
-                || FindAugmentPath(match, match->path[yj]) )
+            if ((match->path[yj] == -1) || FindAugmentPath(match, match->path[yj]))
             {
                 match->path[yj] = xi;
                 return true;
@@ -59,10 +50,9 @@ bool FindAugmentPath(GRAPH_MATCH *match, int xi)
     return false;
 }
 
-
 void ClearOnPathSign(GRAPH_MATCH *match)
 {
-    for(int i = 0; i < UNIT_COUNT; i++)
+    for (int i = 0; i < UNIT_COUNT; i++)
     {
         match->on_path[i] = false;
     }
@@ -70,9 +60,9 @@ void ClearOnPathSign(GRAPH_MATCH *match)
 
 bool Hungary_Match(GRAPH_MATCH *match)
 {
-    for(int xi = 0; xi < UNIT_COUNT; xi++)
+    for (int xi = 0; xi < UNIT_COUNT; xi++)
     {
-        if(FindAugmentPath(match, xi))
+        if (FindAugmentPath(match, xi))
         {
             match->max_match++;
         }
@@ -86,18 +76,18 @@ void InitGraph(GRAPH_MATCH *match, PARTNER *X, PARTNER *Y)
 {
     match->max_match = 0;
     memset(match->edge, 0, UNIT_COUNT * UNIT_COUNT * sizeof(int));
-    for(int i = 0; i < UNIT_COUNT; i++)
+    for (int i = 0; i < UNIT_COUNT; i++)
     {
         match->on_path[i] = false;
         match->path[i] = -1;
-        for(int j = 0; j < X[i].pCount; j++)
+        for (int j = 0; j < X[i].pCount; j++)
             match->edge[i][X[i].perfect[j]] = 1;
     }
 }
 
 void PrintResult(GRAPH_MATCH *match, PARTNER *X, PARTNER *Y)
 {
-    for(int i = 0; i < match->max_match; i++)
+    for (int i = 0; i < match->max_match; i++)
     {
         std::cout << X[match->path[i]].name << "<--->" << Y[i].name << std::endl;
     }
@@ -105,28 +95,27 @@ void PrintResult(GRAPH_MATCH *match, PARTNER *X, PARTNER *Y)
 
 void PrintResult2(GRAPH_MATCH *match, PARTNER *X, PARTNER *Y)
 {
-    int path[UNIT_COUNT] = { 0 };
+    int path[UNIT_COUNT] = {0};
 
-    for(int i = 0; i < match->max_match; i++)
+    for (int i = 0; i < match->max_match; i++)
     {
         path[match->path[i]] = i;
     }
-    for(int i = 0; i < match->max_match; i++)
+    for (int i = 0; i < match->max_match; i++)
     {
         std::cout << X[i].name << "<--->" << Y[path[i]].name << std::endl;
     }
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-    GRAPH_MATCH match = { 0 };
+    GRAPH_MATCH match = {0};
 
     InitGraph(&match, X, Y);
-    if(Hungary_Match(&match))
+    if (Hungary_Match(&match))
     {
         PrintResult2(&match, X, Y);
     }
 
-	return 0;
+    return 0;
 }
-

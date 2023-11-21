@@ -1,24 +1,19 @@
-// gs.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
-
 const int UNIT_COUNT = 4;
 
 typedef struct tagPartner
 {
-    char *name;   //Ãû×Ö
-    int next;     //ÏÂÒ»¸öÑûÇë¶ÔÏó
-    int current;  //µ±Ç°Îè°é£¬-1±íÊ¾»¹Ã»ÓĞÎè°é
-    int pCount; //Æ«°®ÁĞ±íÖĞÎè°é¸öÊı
-    int perfect[UNIT_COUNT]; //Æ«°®ÁĞ±í
-}PARTNER;
+    char *name;              // åå­—
+    int next;                // ä¸‹ä¸€ä¸ªé‚€è¯·å¯¹è±¡
+    int current;             // å½“å‰èˆä¼´ï¼Œ-1è¡¨ç¤ºè¿˜æ²¡æœ‰èˆä¼´
+    int pCount;              // åçˆ±åˆ—è¡¨ä¸­èˆä¼´ä¸ªæ•°
+    int perfect[UNIT_COUNT]; // åçˆ±åˆ—è¡¨
+} PARTNER;
 
 bool IsAllPartnerMatch(PARTNER *partners, int n)
 {
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
-        if(partners[i].current == -1)
+        if (partners[i].current == -1)
         {
             return false;
         }
@@ -29,9 +24,9 @@ bool IsAllPartnerMatch(PARTNER *partners, int n)
 
 int FindFreePartner(PARTNER *partners, int n)
 {
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
-        if((partners[i].current == -1) && (partners[i].next < partners[i].pCount))
+        if ((partners[i].current == -1) && (partners[i].next < partners[i].pCount))
         {
             return i;
         }
@@ -39,28 +34,29 @@ int FindFreePartner(PARTNER *partners, int n)
 
     return -1;
 }
-//ÕâÀïÒ²ÊÇËã·¨Ò»ÖÂĞÔ´¦ÀíµÄÒ»¸ö¼¼ÇÉ
+// è¿™é‡Œä¹Ÿæ˜¯ç®—æ³•ä¸€è‡´æ€§å¤„ç†çš„ä¸€ä¸ªæŠ€å·§
 int GetPerfectPosition(PARTNER *partner, int id)
 {
-    for(int i = 0; i < partner->pCount; i++)
+    for (int i = 0; i < partner->pCount; i++)
     {
-        if(partner->perfect[i] == id)
+        if (partner->perfect[i] == id)
         {
             return i;
         }
     }
 
-    //·µ»ØÒ»¸ö·Ç³£´óµÄÖµ£¬ÒâÎ¶×Å¸ù±¾ÅÅ²»ÉÏ¶Ô
+    // è¿”å›ä¸€ä¸ªéå¸¸å¤§çš„å€¼ï¼Œæ„å‘³ç€æ ¹æœ¬æ’ä¸ä¸Šå¯¹
     return 0x7FFFFFFF;
 }
 
-void InitFreeBoyStack(std::stack<int>& freeBoys, int count)
+void InitFreeBoyStack(std::stack<int> &freeBoys, int count)
 {
-    for(int i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)
     {
         freeBoys.push(i);
     }
 }
+
 #if 0
 bool Gale_Shapley(BOY *boys, GIRL *girls, int count)
 {
@@ -73,45 +69,46 @@ bool Gale_Shapley(BOY *boys, GIRL *girls, int count)
         int bid = freeBoys.top();
         freeBoys.pop();
         int gid = boys[bid].perfect[boys[bid].next];
-        if(girls[gid].current == -1)//Õâ¸öÅ®º¢»¹Ã»ÓĞÎè°é£¿
+        if(girls[gid].current == -1)//è¿™ä¸ªå¥³å­©è¿˜æ²¡æœ‰èˆä¼´ï¼Ÿ
         {
-            boys[bid].current = gid;//½á½»ĞÂÎè°é
+            boys[bid].current = gid;//ç»“äº¤æ–°èˆä¼´
             girls[gid].current = bid;
         }
         else
         {
-            //Å®º¢ÒÑ¾­ÓĞÎè°é£¬Ç°Îè°éÊÇbpid
+            //å¥³å­©å·²ç»æœ‰èˆä¼´ï¼Œå‰èˆä¼´æ˜¯bpid
             int bpid = girls[gid].current;
             if(GetGirlPerfectPosition(&girls[gid], bpid) > GetGirlPerfectPosition(&girls[gid], bid))
             {
-                //Å®º¢Ï²»¶bidÊ¤¹ıÆäÇ°Îè°ébpid£¬ÓÚÊÇË¦µôÇ°Îè°é
-                boys[bpid].current = -1; //Ç°Îè°é»Ö¸´×ÔÓÉÉí
+                //å¥³å­©å–œæ¬¢bidèƒœè¿‡å…¶å‰èˆä¼´bpidï¼Œäºæ˜¯ç”©æ‰å‰èˆä¼´
+                boys[bpid].current = -1; //å‰èˆä¼´æ¢å¤è‡ªç”±èº«
                 if(boys[bpid].next >= boys[bpid].cCount)
                 {
-                    success = false; //Ã»Ï£ÍûÁË
+                    success = false; //æ²¡å¸Œæœ›äº†
                     break;
                 }
                 freeBoys.push(bpid);
-                boys[bid].current = gid; //½á½»ĞÂÎè°é
+                boys[bid].current = gid; //ç»“äº¤æ–°èˆä¼´
                 girls[gid].current = bid;
             }
             else
             {
-                //Å®º¢¸üÏ²»¶Ç°Îè°é£¬ËùÒÔ£¬bid£¬µÈÏÂÒ»´Î°É
+                //å¥³å­©æ›´å–œæ¬¢å‰èˆä¼´ï¼Œæ‰€ä»¥ï¼Œbidï¼Œç­‰ä¸‹ä¸€æ¬¡å§
                 if(boys[bid].next >= boys[bid].cCount)
                 {
-                    success = false; //Ã»Ï£ÍûÁË
+                    success = false; //æ²¡å¸Œæœ›äº†
                     break;
                 }
                 freeBoys.push(bid);
             }
         }
-        boys[bid].next++; //ÎŞÂÛÊÇ·ñÅä¶Ô³É¹¦£¬¶ÔÍ¬Ò»¸öÅ®º¢Ö»³¢ÊÔÅä¶ÔÒ»´Î
+        boys[bid].next++; //æ— è®ºæ˜¯å¦é…å¯¹æˆåŠŸï¼Œå¯¹åŒä¸€ä¸ªå¥³å­©åªå°è¯•é…å¯¹ä¸€æ¬¡
     }
 
     return success;
 }
 #endif
+
 #if 0
 bool Gale_Shapley(BOY *boys, GIRL *girls, int count)
 {
@@ -126,23 +123,23 @@ bool Gale_Shapley(BOY *boys, GIRL *girls, int count)
         for(int i = boys[bid].next; i < boys[bid].pCount; i++)
         {
             int gid = boys[bid].perfect[i];
-            if(girls[gid].current == -1)//Õâ¸öÅ®º¢»¹Ã»ÓĞÎè°é£¿
+            if(girls[gid].current == -1)//è¿™ä¸ªå¥³å­©è¿˜æ²¡æœ‰èˆä¼´ï¼Ÿ
             {
-                boys[bid].current = gid;//½á½»ĞÂÎè°é
+                boys[bid].current = gid;//ç»“äº¤æ–°èˆä¼´
                 girls[gid].current = bid;
                 boys[bid].next = i + 1;
                 break;
             }
             else
             {
-                //Å®º¢ÒÑ¾­ÓĞÎè°é£¬Ç°Îè°éÊÇbpid
+                //å¥³å­©å·²ç»æœ‰èˆä¼´ï¼Œå‰èˆä¼´æ˜¯bpid
                 int bpid = girls[gid].current;
                 if(GetGirlPerfectPosition(&girls[gid], bpid) > GetGirlPerfectPosition(&girls[gid], bid))
                 {
-                    //Å®º¢Ï²»¶bidÊ¤¹ıÆäÇ°Îè°ébpid£¬ÓÚÊÇË¦µôÇ°Îè°é
-                    boys[bpid].current = -1; //Ç°Îè°é»Ö¸´×ÔÓÉÉí
+                    //å¥³å­©å–œæ¬¢bidèƒœè¿‡å…¶å‰èˆä¼´bpidï¼Œäºæ˜¯ç”©æ‰å‰èˆä¼´
+                    boys[bpid].current = -1; //å‰èˆä¼´æ¢å¤è‡ªç”±èº«
                     freeBoys.push(bpid);
-                    boys[bid].current = gid; //½á½»ĞÂÎè°é
+                    boys[bid].current = gid; //ç»“äº¤æ–°èˆä¼´
                     girls[gid].current = bid;
                     boys[bid].next = i + 1;
                     break;
@@ -159,14 +156,15 @@ bool Gale_Shapley(BOY *boys, GIRL *girls, int count)
     return success;
 }
 #endif
+
 #if 1
 bool Gale_Shapley(PARTNER *boys, PARTNER *girls, int count)
 {
     int bid = FindFreePartner(boys, count);
-    while(bid >= 0)
+    while (bid >= 0)
     {
         int gid = boys[bid].perfect[boys[bid].next];
-        if(girls[gid].current == -1)
+        if (girls[gid].current == -1)
         {
             boys[bid].current = gid;
             girls[gid].current = bid;
@@ -174,45 +172,45 @@ bool Gale_Shapley(PARTNER *boys, PARTNER *girls, int count)
         else
         {
             int bpid = girls[gid].current;
-            //Å®º¢Ï²»¶bidÊ¤¹ıÆäµ±Ç°Îè°ébpid
-            if(GetPerfectPosition(&girls[gid], bpid) > GetPerfectPosition(&girls[gid], bid))
+            // å¥³å­©å–œæ¬¢bidèƒœè¿‡å…¶å½“å‰èˆä¼´bpid
+            if (GetPerfectPosition(&girls[gid], bpid) > GetPerfectPosition(&girls[gid], bid))
             {
-                boys[bpid].current = -1; //µ±Ç°Îè°é»Ö¸´×ÔÓÉÉí
-                boys[bid].current = gid; //½á½»ĞÂÎè°é
+                boys[bpid].current = -1; // å½“å‰èˆä¼´æ¢å¤è‡ªç”±èº«
+                boys[bid].current = gid; // ç»“äº¤æ–°èˆä¼´
                 girls[gid].current = bid;
             }
         }
-        boys[bid].next++; //ÎŞÂÛÊÇ·ñÅä¶Ô³É¹¦£¬¶ÔÍ¬Ò»¸öÅ®º¢Ö»ÑûÇëÒ»´Î
+        boys[bid].next++; // æ— è®ºæ˜¯å¦é…å¯¹æˆåŠŸï¼Œå¯¹åŒä¸€ä¸ªå¥³å­©åªé‚€è¯·ä¸€æ¬¡
         bid = FindFreePartner(boys, count);
     }
 
     return IsAllPartnerMatch(boys, count);
 }
 /*
-if((GetPerfectPosition(&girls[gid], bpid) == -1) 
+if((GetPerfectPosition(&girls[gid], bpid) == -1)
     && (GetPerfectPosition(&girls[gid], bid) == -1))
 {
-    //µ±Ç°Îè°ébpidºÍbid¶¼²»ÔÚÅ®º¢µÄÏ²»¶ÁĞ±íÖĞ£¬Ì«Ôã¸âÁË
+    //å½“å‰èˆä¼´bpidå’Œbidéƒ½ä¸åœ¨å¥³å­©çš„å–œæ¬¢åˆ—è¡¨ä¸­ï¼Œå¤ªç³Ÿç³•äº†
     ...
 }
 else if(GetPerfectPosition(&girls[gid], bpid) == -1)
 {
-    //µ±Ç°Îè°ébpid²»ÔÚÅ®º¢µÄÏ²»¶ÁĞ±íÖĞ£¬bidÓĞ»ú»á
+    //å½“å‰èˆä¼´bpidä¸åœ¨å¥³å­©çš„å–œæ¬¢åˆ—è¡¨ä¸­ï¼Œbidæœ‰æœºä¼š
     ...
 }
 else if(GetPerfectPosition(&girls[gid], bid) == -1)
 {
-    //bid²»ÔÚÅ®º¢µÄÏ²»¶ÁĞ±íÖĞ£¬µ±Ç°Îè°ébpidÎ¬³ÖÔ­×´
+    //bidä¸åœ¨å¥³å­©çš„å–œæ¬¢åˆ—è¡¨ä¸­ï¼Œå½“å‰èˆä¼´bpidç»´æŒåŸçŠ¶
     ...
 }
 else if(GetPerfectPosition(&girls[gid], bpid) > GetPerfectPosition(&girls[gid], bid))
 {
-    //Å®º¢Ï²»¶bidÊ¤¹ıÆäµ±Ç°Îè°ébpid
+    //å¥³å­©å–œæ¬¢bidèƒœè¿‡å…¶å½“å‰èˆä¼´bpid
     ...
 }
 else
 {
-    //Å®º¢Ï²»¶µ±Ç°Îè°ébpidÊ¤¹ıbid
+    //å¥³å­©å–œæ¬¢å½“å‰èˆä¼´bpidèƒœè¿‡bid
     ...
 }
 */
@@ -220,44 +218,44 @@ else
 
 void InitPriorityTable()
 {
-    PARTNER girls[] = 
-    {
-        {"Laura", 0, -1, 3, {2,0,1} }, //Laura
-        {"Marcy", 0, -1, 3, {0,2,1} },  //Marcy
-        {"Nancy", 0, -1, 3, {1,0,2} } //Nancy
-    };
+    PARTNER girls[] =
+        {
+            {"Laura", 0, -1, 3, {2, 0, 1}}, // Laura
+            {"Marcy", 0, -1, 3, {0, 2, 1}}, // Marcy
+            {"Nancy", 0, -1, 3, {1, 0, 2}}  // Nancy
+        };
 
-    PARTNER boys[] = 
-    {
-        {"Albert", 0, -1, 3, {0,2,1} }, //Albert
-        {"Brad",   0, -1, 3, {1,2,0} }, //Brad
-        {"Chuck",  0, -1, 3, {0,1,2} } //Chuck
-    };
+    PARTNER boys[] =
+        {
+            {"Albert", 0, -1, 3, {0, 2, 1}}, // Albert
+            {"Brad", 0, -1, 3, {1, 2, 0}},   // Brad
+            {"Chuck", 0, -1, 3, {0, 1, 2}}   // Chuck
+        };
     int priority[UNIT_COUNT][UNIT_COUNT];
 
-for(int w = 0; w < UNIT_COUNT; w++)
-{
-    //³õÊ¼»¯³É×î´óÖµ£¬Ô­ÀíÍ¬ÉÏ
-    for(int j = 0; j < UNIT_COUNT; j++)
+    for (int w = 0; w < UNIT_COUNT; w++)
     {
-        priority[w][j] = 0x7FFFFFFF;
+        // åˆå§‹åŒ–æˆæœ€å¤§å€¼ï¼ŒåŸç†åŒä¸Š
+        for (int j = 0; j < UNIT_COUNT; j++)
+        {
+            priority[w][j] = 0x7FFFFFFF;
+        }
+        // ç»™åçˆ±èˆä¼´æŒ‡å®šä½ç½®å…³ç³»
+        int pos = 0;
+        for (int m = 0; m < girls[w].pCount; m++)
+        {
+            priority[w][girls[w].perfect[m]] = pos++;
+        }
     }
-    //¸øÆ«°®Îè°éÖ¸¶¨Î»ÖÃ¹ØÏµ
-    int pos = 0;
-    for(int m = 0; m < girls[w].pCount; m++)
-    {
-        priority[w][girls[w].perfect[m]] = pos++;
-    }
-}
-//if(priority[gid][bpid] > priority[gid][bid])
-//{}
+    // if(priority[gid][bpid] > priority[gid][bid])
+    //{}
 }
 
 void PrintResult(PARTNER *boys, PARTNER *girls, int count)
 {
-    for(int i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)
     {
-        std::cout << boys[i].name << "[" 
+        std::cout << boys[i].name << "["
                   << GetPerfectPosition(&boys[i], boys[i].current)
                   << "] <---> " << girls[boys[i].current].name << "["
                   << GetPerfectPosition(&girls[boys[i].current], i)
@@ -266,7 +264,7 @@ void PrintResult(PARTNER *boys, PARTNER *girls, int count)
     std::cout << std::endl;
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
 #if 0
 
@@ -299,21 +297,19 @@ Chuck Laura
 */
 #endif
 #if 1
-PARTNER girls[] = 
-{
-    {"A", 0, -1, 4, {2,3,1,0} },
-    {"B", 0, -1, 4, {2,1,3,0} },
-    {"C", 0, -1, 4, {0,2,3,1} },
-    {"D", 0, -1, 4, {1,3,2,0} }
-};
+    PARTNER girls[] =
+        {
+            {"A", 0, -1, 4, {2, 3, 1, 0}},
+            {"B", 0, -1, 4, {2, 1, 3, 0}},
+            {"C", 0, -1, 4, {0, 2, 3, 1}},
+            {"D", 0, -1, 4, {1, 3, 2, 0}}};
 
-PARTNER boys[] = 
-{
-    {"1", 0, -1, 4, {0,3,2,1} },
-    {"2", 0, -1, 4, {0,1,2,3} },
-    {"3", 0, -1, 4, {0,2,3,1} },
-    {"4", 0, -1, 4, {1,0,3,2} }
-};
+    PARTNER boys[] =
+        {
+            {"1", 0, -1, 4, {0, 3, 2, 1}},
+            {"2", 0, -1, 4, {0, 1, 2, 3}},
+            {"3", 0, -1, 4, {0, 2, 3, 1}},
+            {"4", 0, -1, 4, {1, 0, 3, 2}}};
 #endif
 
 #if 0
@@ -336,7 +332,7 @@ PARTNER boys[] =
 };
 #endif
 
-    if(Gale_Shapley(boys, girls, UNIT_COUNT))
+    if (Gale_Shapley(boys, girls, UNIT_COUNT))
     {
         PrintResult(boys, girls, UNIT_COUNT);
     }

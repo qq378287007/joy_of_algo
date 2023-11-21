@@ -1,41 +1,34 @@
-// gs2.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
-
-
 const int UNIT_COUNT = 3;
 
 typedef struct tagPartner
 {
-    char *name;   //Ãû×Ö
-    int next;     //ÏÂÒ»¸öÑûÇë¶ÔÏó
-    int current;  //µ±Ç°Îè°é£¬-1±íÊ¾»¹Ã»ÓĞÎè°é
-    int pCount; //Æ«°®ÁĞ±íÖĞÎè°é¸öÊı
-    int perfect[UNIT_COUNT]; //Æ«°®ÁĞ±í
-}PARTNER;
+    char *name;              // åå­—
+    int next;                // ä¸‹ä¸€ä¸ªé‚€è¯·å¯¹è±¡
+    int current;             // å½“å‰èˆä¼´ï¼Œ-1è¡¨ç¤ºè¿˜æ²¡æœ‰èˆä¼´
+    int pCount;              // åçˆ±åˆ—è¡¨ä¸­èˆä¼´ä¸ªæ•°
+    int perfect[UNIT_COUNT]; // åçˆ±åˆ—è¡¨
+} PARTNER;
 
-
-//ÕâÀïÒ²ÊÇËã·¨Ò»ÖÂĞÔ´¦ÀíµÄÒ»¸ö¼¼ÇÉ
+// è¿™é‡Œä¹Ÿæ˜¯ç®—æ³•ä¸€è‡´æ€§å¤„ç†çš„ä¸€ä¸ªæŠ€å·§
 int GetPerfectPosition(PARTNER *partner, int id)
 {
-    for(int i = 0; i < partner->pCount; i++)
+    for (int i = 0; i < partner->pCount; i++)
     {
-        if(partner->perfect[i] == id)
+        if (partner->perfect[i] == id)
         {
             return i;
         }
     }
 
-    //·µ»ØÒ»¸ö·Ç³£´óµÄÖµ£¬ÒâÎ¶×Å¸ù±¾ÅÅ²»ÉÏ¶Ô
+    // è¿”å›ä¸€ä¸ªéå¸¸å¤§çš„å€¼ï¼Œæ„å‘³ç€æ ¹æœ¬æ’ä¸ä¸Šå¯¹
     return 0x7FFFFFFF;
 }
 
 void PrintResult(PARTNER *boys, PARTNER *girls, int count)
 {
-    for(int i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)
     {
-        std::cout << boys[i].name << "[" 
+        std::cout << boys[i].name << "["
                   << GetPerfectPosition(&boys[i], boys[i].current)
                   << "] <---> " << girls[boys[i].current].name << "["
                   << GetPerfectPosition(&girls[boys[i].current], i)
@@ -51,9 +44,9 @@ bool IsPartnerAssigned(PARTNER *partner)
 
 bool IsFavoritePartner(PARTNER *partner, int bid)
 {
-    for(int i = 0; i < partner->pCount; i++)
+    for (int i = 0; i < partner->pCount; i++)
     {
-        if(partner->perfect[i] == bid) 
+        if (partner->perfect[i] == bid)
         {
             return true;
         }
@@ -64,21 +57,21 @@ bool IsFavoritePartner(PARTNER *partner, int bid)
 
 bool IsStableMatch(PARTNER *boys, PARTNER *girls)
 {
-    for(int i = 0; i < UNIT_COUNT; i++)
+    for (int i = 0; i < UNIT_COUNT; i++)
     {
-        //ÕÒµ½ÄĞº¢µ±Ç°Îè°éÔÚ×Ô¼ºµÄÆ«ºÃÁĞ±íÖĞµÄÎ»ÖÃ
+        // æ‰¾åˆ°ç”·å­©å½“å‰èˆä¼´åœ¨è‡ªå·±çš„åå¥½åˆ—è¡¨ä¸­çš„ä½ç½®
         int gpos = GetPerfectPosition(&boys[i], boys[i].current);
-        //ÔÚpositionÎ»ÖÃÖ®Ç°µÄÎè°é£¬ÄĞº¢Ï²»¶ËıÃÇÊ¤¹ıcurrent
-        for(int k = 0; k < gpos; k++)
+        // åœ¨positionä½ç½®ä¹‹å‰çš„èˆä¼´ï¼Œç”·å­©å–œæ¬¢å¥¹ä»¬èƒœè¿‡current
+        for (int k = 0; k < gpos; k++)
         {
             int gid = boys[i].perfect[k];
-            //ÕÒµ½ÄĞº¢ÔÚÕâ¸öÅ®º¢µÄÆ«ºÃÁĞ±íÖĞµÄÎ»ÖÃ
+            // æ‰¾åˆ°ç”·å­©åœ¨è¿™ä¸ªå¥³å­©çš„åå¥½åˆ—è¡¨ä¸­çš„ä½ç½®
             int bpos = GetPerfectPosition(&girls[gid], i);
-            //ÕÒµ½Å®º¢µÄµ±Ç°Îè°éÔÚÕâ¸öÅ®º¢µÄÆ«ºÃÁĞ±íÖĞµÄÎ»ÖÃ
+            // æ‰¾åˆ°å¥³å­©çš„å½“å‰èˆä¼´åœ¨è¿™ä¸ªå¥³å­©çš„åå¥½åˆ—è¡¨ä¸­çš„ä½ç½®
             int cpos = GetPerfectPosition(&girls[gid], girls[gid].current);
-            if(bpos < cpos)
+            if (bpos < cpos)
             {
-                //Å®º¢Ò²ÊÇÏ²»¶Õâ¸öÄĞº¢Ê¤¹ıÏ²»¶×Ô¼ºµ±Ç°µÄÎè°é£¬ÕâÊÇ²»ÎÈ¶¨ÒòËØ
+                // å¥³å­©ä¹Ÿæ˜¯å–œæ¬¢è¿™ä¸ªç”·å­©èƒœè¿‡å–œæ¬¢è‡ªå·±å½“å‰çš„èˆä¼´ï¼Œè¿™æ˜¯ä¸ç¨³å®šå› ç´ 
                 return false;
             }
         }
@@ -91,10 +84,10 @@ int totalMatch = 0;
 int stableMatch = 0;
 void SearchStableMatch(int index, PARTNER *boys, PARTNER *girls)
 {
-    if(index == UNIT_COUNT)
+    if (index == UNIT_COUNT)
     {
         totalMatch++;
-        if(IsStableMatch(boys, girls))
+        if (IsStableMatch(boys, girls))
         {
             stableMatch++;
             PrintResult(boys, girls, UNIT_COUNT);
@@ -102,11 +95,11 @@ void SearchStableMatch(int index, PARTNER *boys, PARTNER *girls)
         return;
     }
 
-    for(int i = 0; i < boys[index].pCount; i++)
+    for (int i = 0; i < boys[index].pCount; i++)
     {
         int gid = boys[index].perfect[i];
-        
-        if(!IsPartnerAssigned(&girls[gid]) && IsFavoritePartner(&girls[gid], index))
+
+        if (!IsPartnerAssigned(&girls[gid]) && IsFavoritePartner(&girls[gid], index))
         {
             boys[index].current = gid;
             girls[gid].current = index;
@@ -117,22 +110,22 @@ void SearchStableMatch(int index, PARTNER *boys, PARTNER *girls)
     }
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
 #if 1
-    PARTNER girls[] = 
-    {
-        {"Laura", 0, -1, 3, {2,0,1} }, //Laura
-        {"Marcy", 0, -1, 3, {0,2,1} },  //Marcy
-        {"Nancy", 0, -1, 3, {1,0,2} } //Nancy
-    };
+    PARTNER girls[] =
+        {
+            {"Laura", 0, -1, 3, {2, 0, 1}}, // Laura
+            {"Marcy", 0, -1, 3, {0, 2, 1}}, // Marcy
+            {"Nancy", 0, -1, 3, {1, 0, 2}}  // Nancy
+        };
 
-    PARTNER boys[] = 
-    {
-        {"Albert", 0, -1, 3, {0,2,1} }, //Albert
-        {"Brad",   0, -1, 3, {1,2,0} }, //Brad
-        {"Chuck",  0, -1, 3, {0,1,2} } //Chuck
-    };
+    PARTNER boys[] =
+        {
+            {"Albert", 0, -1, 3, {0, 2, 1}}, // Albert
+            {"Brad", 0, -1, 3, {1, 2, 0}},   // Brad
+            {"Chuck", 0, -1, 3, {0, 1, 2}}   // Chuck
+        };
 
 /*
 Albert Laura Nancy Marcy

@@ -23,8 +23,7 @@ void Epon_Sync_Log_Add(EPON_SYNC_LOG_DATA *pLogData)
     {
         // 缓冲区已满，向前移动50条记录，为新纪录腾出空间
         memmove(s_EponSyncLog.syncLogs,
-                s_EponSyncLog.syncLogs + SYNC_LOG_MEMOVER_CNT,
-                (SYNC_LOG_CNT - SYNC_LOG_MEMOVER_CNT) * sizeof(EPON_SYNC_LOG_DATA));
+                s_EponSyncLog.syncLogs + SYNC_LOG_MEMOVER_CNT, (SYNC_LOG_CNT - SYNC_LOG_MEMOVER_CNT) * sizeof(EPON_SYNC_LOG_DATA));
 
         // 清空新腾出来的空间
         memset(s_EponSyncLog.syncLogs + (SYNC_LOG_CNT - SYNC_LOG_MEMOVER_CNT),
@@ -38,6 +37,7 @@ void Epon_Sync_Log_Add(EPON_SYNC_LOG_DATA *pLogData)
 
         return;
     }
+
     // 如果缓冲区有空间，则直接写入当前一条记录
     memmove(s_EponSyncLog.syncLogs + syncLogCnt, pLogData, sizeof(EPON_SYNC_LOG_DATA));
     s_EponSyncLog.logCnt++;

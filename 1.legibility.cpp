@@ -1,5 +1,9 @@
 #include <iostream>
 #include <algorithm>
+#include <cmath>
+using namespace std;
+
+#undef UNICODE
 
 #include "FreeImage.h"
 
@@ -34,13 +38,14 @@ bool ConvertColorToGray(FIBITMAP *color_bmp, FIBITMAP *gray_bmp, BYTE (*calculat
 	if ((color_width != gray_width) || (color_height != gray_height))
 		return false;
 
+	RGBQUAD color;
+	BYTE cidx;
 	for (int y = 0; y < color_height; y++)
 	{
 		for (int x = 0; x < color_width; x++)
 		{
-			RGBQUAD color;
 			FreeImage_GetPixelColor(color_bmp, x, y, &color);
-			BYTE cidx = calculator(color.rgbRed, color.rgbGreen, color.rgbBlue);
+			cidx = calculator(color.rgbRed, color.rgbGreen, color.rgbBlue);
 			FreeImage_SetPixelIndex(gray_bmp, x, y, &cidx);
 		}
 	}
@@ -93,15 +98,15 @@ double Brenner(FIBITMAP *lenabmp)
 	double result = 0.0f;
 	int width = FreeImage_GetWidth(lenabmp);
 	int height = FreeImage_GetHeight(lenabmp);
+	BYTE cidx, nidx;
 	for (int y = 0; y < height; y++)
 	{
 		for (int x = 0; x < width - 2; x++) // 控制范围
 		{
-			BYTE cidx, nidx;
 			FreeImage_GetPixelIndex(lenabmp, x, y, &cidx);	   // 当前像素点
 			FreeImage_GetPixelIndex(lenabmp, x + 2, y, &nidx); // 隔一个像素点
 
-			result += std::pow(nidx - cidx, 2); // 计算差平方，并累加到 result
+			result += pow(nidx - cidx, 2); // 计算差平方，并累加到 result
 		}
 	}
 
@@ -119,7 +124,7 @@ double Brenner(FIBITMAP* lenabmp)
 		BYTE *scanLine = FreeImage_GetScanLine(lenabmp, y);
 		for (int x = 0; x < width - 2; x++) //控制范围
 		{
-			result += std::pow(scanLine[x + 2] - scanLine[x], 2); //计算差平方，并累加到 result
+			result += pow(scanLine[x + 2] - scanLine[x], 2); //计算差平方，并累加到 result
 		}
 	}
 
@@ -150,9 +155,9 @@ double Eva(FIBITMAP* lenabmp)
 			FreeImage_GetPixelIndex(lenabmp, x, y + 1, &bidx); //Bottom 点
 			FreeImage_GetPixelIndex(lenabmp, x + 1, y + 1, &rbidx); //Right, Bottom 点
 
-			result += (std::abs(ltidx - cidx) * 0.7 + std::abs(tidx - cidx) + std::abs(rtidx - cidx) * 0.7
-					+ std::abs(lidx - cidx) + std::abs(ridx - cidx)
-					+ std::abs(lbidx - cidx) * 0.7 + std::abs(bidx - cidx) + std::abs(rbidx - cidx) * 0.7);  //带权重计算 8 个点
+			result += (abs(ltidx - cidx) * 0.7 + abs(tidx - cidx) + abs(rtidx - cidx) * 0.7
+					+ abs(lidx - cidx) + abs(ridx - cidx)
+					+ abs(lbidx - cidx) * 0.7 + abs(bidx - cidx) + abs(rbidx - cidx) * 0.7);  //带权重计算 8 个点
 		}
 	}
 
@@ -172,7 +177,7 @@ double Eva(FIBITMAP *lenabmp)
 		BYTE *nextLine = FreeImage_GetScanLine(lenabmp, y + 1);
 		for (int x = 1; x < width - 1; x++) // 控制范围
 		{
-			result += (std::abs(lastLine[x - 1] - curLine[x]) * 0.7 + std::abs(lastLine[x] - curLine[x]) + std::abs(lastLine[x + 1] - curLine[x]) * 0.7 + std::abs(curLine[x - 1] - curLine[x]) + std::abs(curLine[x + 1] - curLine[x]) + std::abs(nextLine[x - 1] - curLine[x]) * 0.7 + std::abs(nextLine[x] - curLine[x]) + std::abs(nextLine[x + 1] - curLine[x]) * 0.7); // 带权重计算 8 个点
+			result += (abs(lastLine[x - 1] - curLine[x]) * 0.7 + abs(lastLine[x] - curLine[x]) + abs(lastLine[x + 1] - curLine[x]) * 0.7 + abs(curLine[x - 1] - curLine[x]) + abs(curLine[x + 1] - curLine[x]) + abs(nextLine[x - 1] - curLine[x]) * 0.7 + abs(nextLine[x] - curLine[x]) + abs(nextLine[x + 1] - curLine[x]) * 0.7); // 带权重计算 8 个点
 		}
 	}
 
@@ -193,7 +198,7 @@ double Tenengrad(FIBITMAP *lenabmp)
 		{
 			double gx = (lastLine[x + 1] + 2 * curLine[x + 1] + nextLine[x + 1]) - (lastLine[x - 1] + 2 * curLine[x - 1] + nextLine[x - 1]);
 			double gy = (lastLine[x - 1] + 2 * lastLine[x] + lastLine[x + 1]) - (nextLine[x - 1] + 2 * nextLine[x] + nextLine[x + 1]);
-			result += std::sqrt(gx * gx + gy * gy);
+			result += sqrt(gx * gx + gy * gy);
 		}
 	}
 
@@ -214,7 +219,7 @@ double Laplacian(FIBITMAP *lenabmp)
 		{
 			double lxy = lastLine[x - 1] + 4 * curLine[x - 1] + nextLine[x - 1] + 4 * lastLine[x] - 20 * curLine[x] + 4 * nextLine[x] + lastLine[x + 1] + 4 * curLine[x + 1] + nextLine[x + 1];
 
-			result += std::abs(lxy) / 6.0;
+			result += abs(lxy) / 6.0;
 		}
 	}
 
@@ -250,3 +255,5 @@ int main()
 
 	return 0;
 }
+
+// set name=1.legibility&&g++ %name%.cpp libeasyx.a -o %name%.exe -I. -L. -lFreeImage&&%name%.exe

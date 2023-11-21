@@ -89,10 +89,10 @@ bool ConvertGrayScaleToBWWellner(FIBITMAP *gray_bmp, FIBITMAP *bw_bmp, double t)
 	int gray_height = FreeImage_GetHeight(gray_bmp);
 	double factor = (100.0 - t) / 100.0;
 	int s = gray_width / 8; // gray_width >> 3
-	std::vector<double> prev_gn(gray_width);
+	vector<double> prev_gn(gray_width);
 	double gn = 127.0 * s;
 
-	std::fill_n(prev_gn.begin(), gray_width, 127.0 * s); // 上一行的 gn，初始化为平均值 127
+	fill_n(prev_gn.begin(), gray_width, 127.0 * s); // 上一行的 gn，初始化为平均值 127
 
 	for (int y = 0; y < gray_height; y++)
 	{
@@ -139,7 +139,7 @@ unsigned long long *CalcIntegralImages(FIBITMAP *graybmp)
 	int width = FreeImage_GetWidth(graybmp);
 	int height = FreeImage_GetHeight(graybmp);
 
-	unsigned long long *ivals = new (std::nothrow) unsigned long long[width * height];
+	unsigned long long *ivals = new (nothrow) unsigned long long[width * height];
 	if (ivals == nullptr)
 		return nullptr;
 
