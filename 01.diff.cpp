@@ -165,4 +165,4 @@ int main()
 	return 0;
 }
 
-// set name=1.diff&&g++ %name%.cpp libeasyx.a -o %name%.exe -I. -L. -lFreeImage&&%name%.exe
+// set name=01.diff&&g++ %name%.cpp libeasyx.a -o %name%.exe -I. -L. -lFreeImage&&%name%.exe

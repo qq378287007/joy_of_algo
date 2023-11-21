@@ -89,32 +89,33 @@ bool ConvertGrayScaleToBWWellner(FIBITMAP *gray_bmp, FIBITMAP *bw_bmp, double t)
 	int gray_height = FreeImage_GetHeight(gray_bmp);
 	double factor = (100.0 - t) / 100.0;
 	int s = gray_width / 8; // gray_width >> 3
-	vector<double> prev_gn(gray_width);
 	double gn = 127.0 * s;
 
+	vector<double> prev_gn(gray_width);
 	fill_n(prev_gn.begin(), gray_width, 127.0 * s); // 上一行的 gn，初始化为平均值 127
 
+	BYTE pn;
+	BYTE tn;
 	for (int y = 0; y < gray_height; y++)
 	{
 		for (int x = 0; x < gray_width; x++) // 处理奇数行，从左向右
 		{
-			BYTE pn;
 			FreeImage_GetPixelIndex(gray_bmp, x, y, &pn);
-			gn = pn + (1.0 - 1.0 / s) * gn; // 利用g(n) = pn + (1- 1/s)g(n-1) 计算 g(n)
-			BYTE tn = ((double)pn >= factor * (gn + prev_gn[x]) / 2.0 / s) ? 1 : 0;
+			gn = pn + (1.0 - 1.0 / s) * gn; // 利用g(n) = pn + (1- 1/s) * g(n-1) 计算 g(n)
+			tn = ((double)pn >= factor * (gn + prev_gn[x]) / 2.0 / s) ? 1 : 0;
 			FreeImage_SetPixelIndex(bw_bmp, x, y, &tn);
 			prev_gn[x] = gn;
 		}
+
 		y++;				  // 转到下一行，处理偶数行
 		if (y == gray_height) // 没有下一行了，结束
 			break;
 
 		for (int x = gray_width - 1; x >= 0; x--)
 		{
-			BYTE pn;
 			FreeImage_GetPixelIndex(gray_bmp, x, y, &pn);
-			gn = pn + (1.0 - 1.0 / s) * gn; // 利用g(n) = pn + (1- 1/s)g(n-1) 计算 g(n)
-			BYTE tn = ((double)pn >= factor * (gn + prev_gn[x]) / 2.0 / s) ? 1 : 0;
+			gn = pn + (1.0 - 1.0 / s) * gn; // 利用g(n) = pn + (1- 1/s) * g(n-1) 计算 g(n)
+			tn = ((double)pn >= factor * (gn + prev_gn[x]) / 2.0 / s) ? 1 : 0;
 			FreeImage_SetPixelIndex(bw_bmp, x, y, &tn);
 			prev_gn[x] = gn;
 		}
@@ -142,14 +143,14 @@ unsigned long long *CalcIntegralImages(FIBITMAP *graybmp)
 	unsigned long long *ivals = new (nothrow) unsigned long long[width * height];
 	if (ivals == nullptr)
 		return nullptr;
-
 	memset(ivals, 0, width * height * sizeof(unsigned long long));
+
+	BYTE cidx;
 	for (int x = 0; x < width; x++)
 	{
 		unsigned long long sum = 0;
 		for (int y = 0; y < height; y++)
 		{
-			BYTE cidx;
 			FreeImage_GetPixelIndex(graybmp, x, y, &cidx);
 			sum += cidx;
 			if (x == 0)
@@ -172,6 +173,8 @@ bool ConvertGrayScaleToBWBradleyRoth(FIBITMAP *gray_bmp, FIBITMAP *bw_bmp, doubl
 	if (ivals == nullptr)
 		return false;
 
+	BYTE pn;
+	BYTE tn;
 	for (int x = 0; x < width; x++)
 	{
 		for (int y = 0; y < height; y++)
@@ -188,9 +191,9 @@ bool ConvertGrayScaleToBWBradleyRoth(FIBITMAP *gray_bmp, FIBITMAP *bw_bmp, doubl
 			int count = (x2 - x1) * (y2 - y1); // 计算包围范围内实际像素点的个数，不包括 x1 和 y1 所在的行和列
 			// 公式翻译：I(x2,y2)-I(x2,y1-1)-I(x1-1,y2)+I(x1-1,y1-1)
 			unsigned long long sum = ivals[x2 + y2 * width] - ivals[x2 + y1 * width] - ivals[x1 + y2 * width] + ivals[x1 + y1 * width];
-			BYTE pn;
+
 			FreeImage_GetPixelIndex(gray_bmp, x, y, &pn);
-			BYTE tn = ((double)pn >= (factor * sum / count)) ? 1 : 0;
+			tn = ((double)pn >= (factor * sum / count)) ? 1 : 0;
 			FreeImage_SetPixelIndex(bw_bmp, x, y, &tn);
 		}
 	}
@@ -304,4 +307,4 @@ int main()
 	return 0;
 }
 
-// set name=1.bw&&g++ %name%.cpp libeasyx.a -o %name%.exe -I. -L. -lFreeImage&&%name%.exe
+// set name=01.bw&&g++ %name%.cpp libeasyx.a -o %name%.exe -I. -L. -lFreeImage&&%name%.exe

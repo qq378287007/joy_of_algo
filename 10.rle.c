@@ -1,176 +1,138 @@
-// rle.cpp : Defines the entry point for the console application.
-//
+#include <stdio.h>
+#include <stdlib.h>
 
-#include "stdafx.h"
-
-
+#define bool int
+#define false 0
+#define true 1
 
 int PcxRle_Encode(unsigned char *inbuf, int inSize, unsigned char *outbuf, int onuBufSize)
 {
     unsigned char *src = inbuf;
-    int i;
     int encSize = 0;
-
-    while(src < (inbuf + inSize))
+    while (src < (inbuf + inSize))
     {
         unsigned char value = *src++;
-        i = 1;
-        while((*src == value) && (i < 63))
+        int i = 1;
+        while ((*src == value) && (i < 63))
         {
             src++;
             i++;
         }
 
-        if((encSize + i + 1) > onuBufSize) /*Êä³ö»º³åÇø¿Õ¼ä²»¹»ÁË*/
-        {
+        if ((encSize + i + 1) > onuBufSize) // è¾“å‡ºç¼“å†²åŒºç©ºé—´ä¸å¤Ÿäº†
             return -1;
-        }
-        if(i > 1)
+
+        if (i > 1)
         {
             outbuf[encSize++] = i | 0xC0;
             outbuf[encSize++] = value;
         }
         else
         {
-            /*Èç¹û·ÇÖØ¸´Êı¾İ×î¸ßÁ½Î»ÊÇ1£¬²åÈë±êÊ¶×Ö½Ú*/
-            if((value & 0xC0) == 0xC0) 
-            {
+            // å¦‚æœéé‡å¤æ•°æ®æœ€é«˜ä¸¤ä½æ˜¯1ï¼Œæ’å…¥æ ‡è¯†å­—èŠ‚
+            if ((value & 0xC0) == 0xC0)
                 outbuf[encSize++] = 0xC1;
-            }
+
             outbuf[encSize++] = value;
         }
     }
-
     return encSize;
 }
 
 int PcxRle_Decode(unsigned char *inbuf, int inSize, unsigned char *outbuf, int onuBufSize)
 {
     unsigned char *src = inbuf;
-    int i;
     int decSize = 0;
-    int count = 0;
-
-    while(src < (inbuf + inSize))
+    while (src < (inbuf + inSize))
     {
         unsigned char value = *src++;
         int count = 1;
-        if((value & 0xC0) == 0xC0) /*ÊÇ·ñÓĞ¿éÊôĞÔ±êÖ¾*/
+        if ((value & 0xC0) == 0xC0) // æ˜¯å¦æœ‰å—å±æ€§æ ‡å¿—
         {
-            count = value & 0x3F; /*µÍ6Î»ÊÇcount*/
+            count = value & 0x3F; // ä½6ä½æ˜¯count
             value = *src++;
         }
-        else
-        {
-            count = 1;
-        }
-        if((decSize + count) > onuBufSize) /*Êä³ö»º³åÇø¿Õ¼ä²»¹»ÁË*/
-        {
-            return -1;
-        }
-        for(i = 0; i < count; i++)
-        {
-            outbuf[decSize++] = value;
-        }
-    }
 
+        if ((decSize + count) > onuBufSize) // è¾“å‡ºç¼“å†²åŒºç©ºé—´ä¸å¤Ÿäº†
+            return -1;
+
+        for (int i = 0; i < count; i++)
+            outbuf[decSize++] = value;
+    }
     return decSize;
 }
 
 bool IsRepetitionStart(unsigned char *start, int length)
 {
-    if(length <= 2)
+    if (length <= 2)
         return false;
 
-    if( (*(start + 1) == *start) && (*(start + 2) == *start) )
-    {
-        return true;
-    }
-
-    return false;
+    return start[1] == start[0] && start[2] == start[0];
 }
 
-/*ÏŞÖÆ·µ»Ø³¤¶È²»³¬¹ı127*/
+// é™åˆ¶è¿”å›é•¿åº¦ä¸è¶…è¿‡127
 int GetRepetitionCount(unsigned char *start, int length)
 {
-    if(length <= 1)
+    if (length <= 1)
         return length;
 
     unsigned char value = *start;
-    unsigned char *src = start + 1;
-    int i = 1;
-    while( (src < (start + length)) && (i < 127) )
-    {
-        if(*src != value)
-        {
-            break;
-        }
 
+    int i = 1;
+    for (unsigned char *src = start + 1; (src < (start + length)) && (i < 127); src++)
+    {
+        if (*src != value)
+            break;
         i++;
-        src++;
     }
 
     return i;
 }
 
-/*ÏŞÖÆ·µ»Ø³¤¶È²»³¬¹ı127*/
+// é™åˆ¶è¿”å›é•¿åº¦ä¸è¶…è¿‡127
 int GetNonRepetitionCount(unsigned char *start, int length)
 {
-    if(length <= 1)
+    if (length <= 1)
         return length;
 
     unsigned char value = *start;
-    unsigned char *src = start;
     int i = 0;
-    while( (src < (start + length)) && (i < 127) )
+    for (unsigned char *src = start; (src < (start + length)) && (i < 127); src++)
     {
-        if(IsRepetitionStart(src, length - i))
-        {
+        if (IsRepetitionStart(src, length - i))
             break;
-        }
-
         i++;
-        src++;
     }
-
     return i;
 }
 
 int Rle_Encode(unsigned char *inbuf, int inSize, unsigned char *outbuf, int onuBufSize)
 {
     unsigned char *src = inbuf;
-    int i;
     int encSize = 0;
-    int srcLeft = inSize;
 
-    while(srcLeft > 0)
+    int count;
+    for (int srcLeft = inSize; srcLeft > 0; srcLeft -= count)
     {
-        int count = 0;
-        if(IsRepetitionStart(src, srcLeft)) /*ÊÇ·ñÁ¬ĞøÈı¸ö×Ö½ÚÊı¾İÏàÍ¬£¿*/
+        if (IsRepetitionStart(src, srcLeft)) // æ˜¯å¦è¿ç»­ä¸‰ä¸ªå­—èŠ‚æ•°æ®ç›¸åŒï¼Ÿ
         {
-            if((encSize + 2) > onuBufSize) /*Êä³ö»º³åÇø¿Õ¼ä²»¹»ÁË*/
-            {
+            if ((encSize + 2) > onuBufSize) // è¾“å‡ºç¼“å†²åŒºç©ºé—´ä¸å¤Ÿäº†
                 return -1;
-            }
+
             count = GetRepetitionCount(src, srcLeft);
             outbuf[encSize++] = count | 0x80;
             outbuf[encSize++] = *src;
             src += count;
-            srcLeft -= count;
         }
         else
         {
             count = GetNonRepetitionCount(src, srcLeft);
-            if((encSize + count + 1) > onuBufSize) /*Êä³ö»º³åÇø¿Õ¼ä²»¹»ÁË*/
-            {
+            if ((encSize + count + 1) > onuBufSize) // è¾“å‡ºç¼“å†²åŒºç©ºé—´ä¸å¤Ÿäº†
                 return -1;
-            }
+
             outbuf[encSize++] = count;
-            for(i = 0; i < count; i++) /*Öğ¸ö¸´ÖÆÕâĞ©Êı¾İ*/
-            {
-                outbuf[encSize++] = *src++;;
-            }
-            srcLeft -= count;
+            for (int i = 0; i < count; i++) // é€ä¸ªå¤åˆ¶è¿™äº›æ•°æ®
+                outbuf[encSize++] = *src++;
         }
     }
     return encSize;
@@ -179,35 +141,26 @@ int Rle_Encode(unsigned char *inbuf, int inSize, unsigned char *outbuf, int onuB
 int Rle_Decode(unsigned char *inbuf, int inSize, unsigned char *outbuf, int onuBufSize)
 {
     unsigned char *src = inbuf;
-    int i;
     int decSize = 0;
-    int count = 0;
-
-    while(src < (inbuf + inSize))
+    while (src < (inbuf + inSize))
     {
         unsigned char sign = *src++;
         int count = sign & 0x3F;
-        if((decSize + count) > onuBufSize) /*Êä³ö»º³åÇø¿Õ¼ä²»¹»ÁË*/
-        {
+        if ((decSize + count) > onuBufSize) // è¾“å‡ºç¼“å†²åŒºç©ºé—´ä¸å¤Ÿäº†
             return -1;
-        }
-        if((sign & 0x80) == 0x80) /*Á¬ĞøÖØ¸´Êı¾İ±êÖ¾*/
+
+        if ((sign & 0x80) == 0x80) // è¿ç»­é‡å¤æ•°æ®æ ‡å¿—
         {
-            for(i = 0; i < count; i++)
-            {
+            for (int i = 0; i < count; i++)
                 outbuf[decSize++] = *src;
-            }
             src++;
         }
         else
         {
-            for(i = 0; i < count; i++)
-            {
+            for (int i = 0; i < count; i++)
                 outbuf[decSize++] = *src++;
-            }
         }
     }
-
     return decSize;
 }
 
@@ -217,8 +170,8 @@ typedef struct
     char version;
     char encoding;
     char bits_per_pixel;
-    unsigned short xmin,ymin;
-    unsigned short xmax,ymax;
+    unsigned short xmin, ymin;
+    unsigned short xmax, ymax;
     unsigned short hres;
     unsigned short vres;
     char palette[48];
@@ -227,7 +180,7 @@ typedef struct
     unsigned short bytes_per_line;
     unsigned short palette_type;
     char filler[58];
-}PCX_HEAD;
+} PCX_HEAD;
 
 bool GetPcxfileHeader(FILE *fp, PCX_HEAD *header)
 {
@@ -240,18 +193,15 @@ void DrawPixel(int x, int y, int colorIdx)
 
 int DecodePcxLine(PCX_HEAD *header, unsigned char *imgData, unsigned char *lineBuf)
 {
-    int i = 0;
     int offset = 0;
-    while(i < header->bytes_per_line)
+    for (int i = 0; i < header->bytes_per_line;)
     {
         unsigned char value = imgData[offset++];
-        if((value & 0xc0) == 0xc0) /*ÅĞ¶Ï±êÖ¾*/
+        if ((value & 0xc0) == 0xc0) // åˆ¤æ–­æ ‡å¿—
         {
-            value = value & 0x3F; /*count*/
-            for(int repeat = 0; repeat < value; repeat++)
-            {
+            value = value & 0x3F; // count
+            for (int repeat = 0; repeat < value; repeat++)
                 lineBuf[i++] = imgData[offset];
-            }
             offset++;
         }
         else
@@ -265,45 +215,37 @@ int DecodePcxLine(PCX_HEAD *header, unsigned char *imgData, unsigned char *lineB
 
 void ShowPcxFile(FILE *fp)
 {
-    PCX_HEAD header = { 0 };
-    if(!GetPcxfileHeader(fp, &header))
+    PCX_HEAD header = {0};
+    if (!GetPcxfileHeader(fp, &header))
         return;
 
     unsigned char *imgData = NULL;
-    unsigned char *bitsLine = new unsigned char[header.bytes_per_line];
+    unsigned char *bitsLine = (unsigned char *)malloc(sizeof(unsigned char) * header.bytes_per_line);
     int height = header.ymax - header.ymin;
     int width = header.xmax - header.xmin;
     int srcIdx = 0;
-    for(int y = 0; y < height; y++)
+    for (int y = 0; y < height; y++)
     {
         srcIdx += DecodePcxLine(&header, imgData + srcIdx, bitsLine);
-        for(int x = 0; x < width; x++)
-        {
+        for (int x = 0; x < width; x++)
             DrawPixel(x, y, bitsLine[x]);
-        }
     }
 }
 
-int main(int argc, char* argv[])
+int main()
 {
-    //unsigned char srcData[] = {'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'C', 'D' };
-    unsigned char srcData[] = {'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'C', 'A', 'B', 'C', 'D', 'D', 'D' };
-    unsigned char procBuf[64] = { 0 };
-    unsigned char srcBuf[64] = { 0 };
-    
-/*
-    int procLen = Rle_Encode_N(srcData, 15, procBuf, 64);
+    // unsigned char srcData[] = {'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'C', 'D' };
+    unsigned char srcData[] = {'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'C', 'A', 'B', 'C', 'D', 'D', 'D'};
+    unsigned char procBuf[64] = {0};
+    unsigned char srcBuf[64] = {0};
 
-    int srcLen = Rle_Decode_N(procBuf, procLen, srcBuf, 64);
-    
-    int procLen = Rle_Encode_P(srcData, 15, procBuf, 64);
+    // int procLen = Rle_Encode_N(srcData, 15, procBuf, 64);
+    // int srcLen = Rle_Decode_N(procBuf, procLen, srcBuf, 64);
 
-    int srcLen = Rle_Decode_P(procBuf, procLen, srcBuf, 64);
+    // int procLen = Rle_Encode_P(srcData, 15, procBuf, 64);
+    // int srcLen = Rle_Decode_P(procBuf, procLen, srcBuf, 64);
 
-*/
     int procLen = Rle_Encode(srcData, 15, procBuf, 64);
-
     int srcLen = Rle_Decode(procBuf, procLen, srcBuf, 64);
-	return 0;
+    return 0;
 }
-

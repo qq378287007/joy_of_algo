@@ -145,4 +145,4 @@ int main()
 	return 0;
 }
 
-// set name=1.gray&&g++ %name%.cpp libeasyx.a -o %name%.exe -I. -L. -lFreeImage&&%name%.exe
+// set name=01.gray&&g++ %name%.cpp libeasyx.a -o %name%.exe -I. -L. -lFreeImage&&%name%.exe
