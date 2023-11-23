@@ -20,11 +20,6 @@ CSnow::CSnow(const CSnow &snow)
 	m_layers = snow.m_layers;
 }
 
-CSnow::~CSnow()
-{
-	int sss = 0;
-}
-
 void CSnow::UpdatePosition(int dps)
 {
 	if (dps == 0)

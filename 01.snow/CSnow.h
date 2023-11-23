@@ -9,7 +9,6 @@ protected:
 
 public:
 	CSnow(const CSnow &snow);
-	~CSnow();
 	POINT &GetPosition() { return m_pos; }
 	const POINT &GetPosition() const { return m_pos; }
 	int GetSpeed() const { return m_speed; }

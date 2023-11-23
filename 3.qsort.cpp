@@ -34,9 +34,7 @@ int partion(int *arElem, int p, int r)
     if (arElem[j] < x)
     {
       if (i != j)
-      {
         exchange(arElem, i, j);
-      }
       i++;
     }
   }

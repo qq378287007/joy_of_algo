@@ -79,11 +79,11 @@ bool ConvertColorToGray(FIBITMAP *color_bmp, FIBITMAP *gray_bmp, BYTE (*calculat
 	if ((color_width != gray_width) || (color_height != gray_height))
 		return false;
 
+	RGBQUAD color;
 	for (int y = 0; y < color_height; y++)
 	{
 		for (int x = 0; x < color_width; x++)
 		{
-			RGBQUAD color;
 			FreeImage_GetPixelColor(color_bmp, x, y, &color);
 			BYTE cidx = calculator(color.rgbRed, color.rgbGreen, color.rgbBlue);
 			FreeImage_SetPixelIndex(gray_bmp, x, y, &cidx);
@@ -154,9 +154,7 @@ FIBITMAP *LaplacianImage(FIBITMAP *grayimg)
 void GenerateSnows(int count, int maxWidth, list<CSnow> &snows)
 {
 	for (int i = 0; i < count; i++)
-	{
 		snows.push_back(MakeSnow(maxWidth));
-	}
 }
 
 void DrawSnowOnDevice(const CSnow &sn, int width, int height)
@@ -193,16 +191,12 @@ void DrawSnowOnImage(IMAGE *img, const CSnow &sn, int width, int height)
 bool CheckEdgeStop(FIBITMAP *lcImg, int x, int y, int ds, int width, int height)
 {
 	int ny = y + ds;
-
 	if (ny >= height)
 		return false;
 
 	BYTE cidx;
 	FreeImage_GetPixelIndex(lcImg, x, height - ny - 1, &cidx);
-	if (cidx == 1)
-		return true;
-
-	return false;
+	return cidx == 1;
 }
 
 void UpdateAndDrawSnows(IMAGE *img, FIBITMAP *lcImg, list<CSnow> &snows)
@@ -245,16 +239,14 @@ void UpdateAndDrawSnows(IMAGE *img, FIBITMAP *lcImg, list<CSnow> &snows)
 	}
 
 	putimage(0, 0, img);
-	for (auto &sn : snows)
-	{
+	for (const CSnow &sn : snows)
 		DrawSnowOnDevice(sn, width, height);
-	}
 }
-
-const char *src_sc_file = "E:\\Alg 2\\resource\\lake.jpg";
 
 int main()
 {
+	const char *src_sc_file = "lake.jpg";
+
 	EasyXEnv init(1152, 720);
 	BeginBatchDraw();
 

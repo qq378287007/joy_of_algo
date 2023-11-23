@@ -14,12 +14,12 @@ typedef struct
 
 void InitDict(WORD_DICT &dict)
 {
-    // ´ÊÒÑ¾­ÅÅĞò¹ıÁË
-    vector<wstring> w1 = {L"´ó", L"ÊĞ", L"ÎÒ", L"ÊÇ", L"ÓĞ", L"ÇÅ", L"½­"};
-    vector<wstring> w2 = {L"ÄÏ¾©", L"´óÇÅ", L"ÊĞ³¤", L"ÒâË¼", L"±à³Ì", L"¼ÆËã", L"³¤½­"};
-    vector<wstring> w3 = {L"ÄÏ¾©ÊĞ", L"½­´óÇÅ", L"¼ÆËã»ú"};
-    vector<wstring> w4 = {L"ÈËÃñ¹ã³¡", L"Ï²ÂíÀ­ÑÅ", L"¸ß¿ÆÎ÷Â·"};
-    vector<wstring> w5 = {L"ÈËÃñ´ó»áÌÃ", L"»¦ÉÏĞÂÎÅÌ¨"};
+    // è¯å·²ç»æ’åºè¿‡äº†
+    vector<wstring> w1 = {L"å¤§", L"å¸‚", L"æˆ‘", L"æ˜¯", L"æœ‰", L"æ¡¥", L"æ±Ÿ"};
+    vector<wstring> w2 = {L"å—äº¬", L"å¤§æ¡¥", L"å¸‚é•¿", L"æ„æ€", L"ç¼–ç¨‹", L"è®¡ç®—", L"é•¿æ±Ÿ"};
+    vector<wstring> w3 = {L"å—äº¬å¸‚", L"æ±Ÿå¤§æ¡¥", L"è®¡ç®—æœº"};
+    vector<wstring> w4 = {L"äººæ°‘å¹¿åœº", L"å–œé©¬æ‹‰é›…", L"é«˜ç§‘è¥¿è·¯"};
+    vector<wstring> w5 = {L"äººæ°‘å¤§ä¼šå ‚", L"æ²ªä¸Šæ–°é—»å°"};
 
     dict.max_len = 5;
     dict.words[1] = w1;
@@ -29,11 +29,10 @@ void InitDict(WORD_DICT &dict)
     dict.words[5] = w5;
 }
 
-// ÕÅÈıÊÇÉÏº£ÊĞÈË´ó´ú±í
-
+// å¼ ä¸‰æ˜¯ä¸Šæµ·å¸‚äººå¤§ä»£è¡¨
 bool LookupDict(const WORD_DICT &dict, wstring &word)
 {
-    int length = word.length(); // ¸ù¾İ´Ê³¤Ñ¡Ôñ¶ÔÓ¦µÄ´Ê¼¯
+    int length = word.length(); // æ ¹æ®è¯é•¿é€‰æ‹©å¯¹åº”çš„è¯é›†
     const vector<wstring> &wds = dict.words.at(length);
 
     return binary_search(wds.begin(), wds.end(), word);
@@ -43,35 +42,27 @@ bool MatchWord(const WORD_DICT &dict, wstring &s2)
 {
     while (!s2.empty())
     {
-        if (LookupDict(dict, s2)) // ²é´Êµä
-        {
+        if (LookupDict(dict, s2)) // æŸ¥è¯å…¸
             return true;
-        }
         else
-        {
-            s2.pop_back(); // ´Ós2ÖĞÉ¾³ı×îºóÒ»¸ö×Ö
-        }
+            s2.pop_back(); // ä»s2ä¸­åˆ é™¤æœ€åä¸€ä¸ªå­—
     }
 
-    // s2¶¼¿ÕÁËÒ²Ã»Æ¥Åäµ½´Ê£¿¿ÉÄÜÊÇ´ÊµäÓĞÎÊÌâ
+    // s2éƒ½ç©ºäº†ä¹Ÿæ²¡åŒ¹é…åˆ°è¯ï¼Ÿå¯èƒ½æ˜¯è¯å…¸æœ‰é—®é¢˜
     return false;
 }
 
 bool MaxMatching(const wstring &sentence, const WORD_DICT &dict, vector<wstring> &words)
 {
-    wstring s1 = sentence;
-
-    while (!s1.empty())
+    wstring s2;
+    for (wstring s1 = sentence; !s1.empty(); s1 = s1.substr(s2.length()))
     {
         int s2_len = (s1.length() > dict.max_len) ? dict.max_len : s1.length();
-        wstring s2 = s1.substr(0, s2_len);
+        s2 = s1.substr(0, s2_len);
         if (!MatchWord(dict, s2))
-        {
             return false;
-        }
 
         words.push_back(s2);
-        s1 = s1.substr(s2.length());
     }
 
     return true;
@@ -81,32 +72,25 @@ bool ReverseMatchWord(const WORD_DICT &dict, wstring &s2)
 {
     while (!s2.empty())
     {
-        if (LookupDict(dict, s2)) // ²é´Êµä
-        {
+        if (LookupDict(dict, s2)) // æŸ¥è¯å…¸
             return true;
-        }
         else
-        {
-            s2 = s2.substr(1); // ´Ós2ÖĞÉ¾³ıµÚÒ»¸ö×Ö
-        }
+            s2 = s2.substr(1); // ä»s2ä¸­åˆ é™¤ç¬¬ä¸€ä¸ªå­—
     }
 
-    // s2¶¼¿ÕÁËÒ²Ã»Æ¥Åäµ½´Ê£¿¿ÉÄÜÊÇ´ÊµäÓĞÎÊÌâ
+    // s2éƒ½ç©ºäº†ä¹Ÿæ²¡åŒ¹é…åˆ°è¯ï¼Ÿå¯èƒ½æ˜¯è¯å…¸æœ‰é—®é¢˜
     return false;
 }
 
 bool ReverseMaxMatching(const wstring &sentence, const WORD_DICT &dict, vector<wstring> &words)
 {
     wstring s1 = sentence;
-
     while (!s1.empty())
     {
         int s2_pos = (s1.length() > dict.max_len) ? s1.length() - dict.max_len : 0;
         wstring s2 = s1.substr(s2_pos);
         if (!ReverseMatchWord(dict, s2))
-        {
             return false;
-        }
 
         words.push_back(s2);
         s1 = s1.substr(0, s1.length() - s2.length());
@@ -121,52 +105,39 @@ int main()
     wcout.imbue(locale("chs"));
 
     WORD_DICT dict;
-
     InitDict(dict);
 
-    wstring sentence = L"¼ÆËã»ú±à³ÌÓĞÒâË¼";
+    wstring sentence = L"è®¡ç®—æœºç¼–ç¨‹æœ‰æ„æ€";
     vector<wstring> words;
     if (MaxMatching(sentence, dict, words))
     {
-        for (auto &str : words)
-        {
+        for (const wstring &str : words)
             wcout << str << L"/";
-        }
-
         wcout << endl;
     }
 
     words.clear();
     if (ReverseMaxMatching(sentence, dict, words))
     {
-        for (auto &str : words)
-        {
+        for (const wstring &str : words)
             wcout << str << L"/";
-        }
-
         wcout << endl;
     }
 
-    wstring sentence2 = L"ÄÏ¾©ÊĞ³¤½­´óÇÅ";
+    wstring sentence2 = L"å—äº¬å¸‚é•¿æ±Ÿå¤§æ¡¥";
     words.clear();
     if (MaxMatching(sentence2, dict, words))
     {
-        for (auto &str : words)
-        {
+        for (const wstring &str : words)
             wcout << str << L"/";
-        }
-
         wcout << endl;
     }
 
     words.clear();
     if (ReverseMaxMatching(sentence2, dict, words))
     {
-        for (auto &str : words)
-        {
+        for (const wstring &str : words)
             wcout << str << L"/";
-        }
-
         wcout << endl;
     }
 

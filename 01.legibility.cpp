@@ -123,11 +123,8 @@ double Brenner(FIBITMAP* lenabmp)
 	{
 		BYTE *scanLine = FreeImage_GetScanLine(lenabmp, y);
 		for (int x = 0; x < width - 2; x++) //控制范围
-		{
 			result += pow(scanLine[x + 2] - scanLine[x], 2); //计算差平方，并累加到 result
-		}
 	}
-
 	return result / (height * double(width - 2)); //计算平均值
 }
 */
@@ -160,7 +157,6 @@ double Eva(FIBITMAP* lenabmp)
 					+ abs(lbidx - cidx) * 0.7 + abs(bidx - cidx) + abs(rbidx - cidx) * 0.7);  //带权重计算 8 个点
 		}
 	}
-
 	return result / (double(height - 2) * double(width - 2)); //计算平均值
 }
 */
@@ -176,9 +172,7 @@ double Eva(FIBITMAP *lenabmp)
 		BYTE *curLine = FreeImage_GetScanLine(lenabmp, y);
 		BYTE *nextLine = FreeImage_GetScanLine(lenabmp, y + 1);
 		for (int x = 1; x < width - 1; x++) // 控制范围
-		{
 			result += (abs(lastLine[x - 1] - curLine[x]) * 0.7 + abs(lastLine[x] - curLine[x]) + abs(lastLine[x + 1] - curLine[x]) * 0.7 + abs(curLine[x - 1] - curLine[x]) + abs(curLine[x + 1] - curLine[x]) + abs(nextLine[x - 1] - curLine[x]) * 0.7 + abs(nextLine[x] - curLine[x]) + abs(nextLine[x + 1] - curLine[x]) * 0.7); // 带权重计算 8 个点
-		}
 	}
 
 	return result / (double(height - 2) * double(width - 2)); // 计算平均值
@@ -256,4 +250,4 @@ int main()
 	return 0;
 }
 
-// set name=1.legibility&&g++ %name%.cpp libeasyx.a -o %name%.exe -I. -L. -lFreeImage&&%name%.exe
+// set name=01.legibility&&g++ %name%.cpp libeasyx.a -o %name%.exe -I. -L. -lFreeImage&&%name%.exe
