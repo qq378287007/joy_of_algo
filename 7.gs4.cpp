@@ -9,24 +9,24 @@
 //using namespace std;
 
 const int UNIT_COUNT = 5;
-const int INFINITE = 100000000; // Ïà¶ÔÎŞÇî´ó
+const int INFINITE = 100000000; // ç›¸å¯¹æ— ç©·å¤§
 
 typedef struct tagPartner
 {
-    char *name;   //Ãû×Ö
+    char *name;   //åå­—
     int weight[UNIT_COUNT]; 
 }PARTNER;
 
 typedef struct tagKmMatch
 {
-    int edge[UNIT_COUNT][UNIT_COUNT]; //XiÓëYj¶ÔÓ¦µÄ±ßµÄÈ¨ÖØ
-    bool sub_map[UNIT_COUNT][UNIT_COUNT];// ¶ş·ÖÍ¼µÄÏàµÈ×ÓÍ¼, sub_map[i][j] = 1 ´ú±íXiÓëYjÓĞ±ß
-    bool x_on_path[UNIT_COUNT]; // ±ê¼ÇÔÚÒ»´ÎÑ°ÕÒÔö¹ãÂ·¾¶µÄ¹ı³ÌÖĞ£¬XiÊÇ·ñÔÚÔö¹ãÂ·¾¶ÉÏ
-    bool y_on_path[UNIT_COUNT]; // ±ê¼ÇÔÚÒ»´ÎÑ°ÕÒÔö¹ãÂ·¾¶µÄ¹ı³ÌÖĞ£¬YiÊÇ·ñÔÚÔö¹ãÂ·¾¶ÉÏ
-    int path[UNIT_COUNT]; // Æ¥ÅäĞÅÏ¢£¬ÆäÖĞiÎªYÖĞµÄ¶¥µã±êºÅ£¬path[i]ÎªXÖĞ¶¥µã±êºÅ
+    int edge[UNIT_COUNT][UNIT_COUNT]; //Xiä¸Yjå¯¹åº”çš„è¾¹çš„æƒé‡
+    bool sub_map[UNIT_COUNT][UNIT_COUNT];// äºŒåˆ†å›¾çš„ç›¸ç­‰å­å›¾, sub_map[i][j] = 1 ä»£è¡¨Xiä¸Yjæœ‰è¾¹
+    bool x_on_path[UNIT_COUNT]; // æ ‡è®°åœ¨ä¸€æ¬¡å¯»æ‰¾å¢å¹¿è·¯å¾„çš„è¿‡ç¨‹ä¸­ï¼ŒXiæ˜¯å¦åœ¨å¢å¹¿è·¯å¾„ä¸Š
+    bool y_on_path[UNIT_COUNT]; // æ ‡è®°åœ¨ä¸€æ¬¡å¯»æ‰¾å¢å¹¿è·¯å¾„çš„è¿‡ç¨‹ä¸­ï¼ŒYiæ˜¯å¦åœ¨å¢å¹¿è·¯å¾„ä¸Š
+    int path[UNIT_COUNT]; // åŒ¹é…ä¿¡æ¯ï¼Œå…¶ä¸­iä¸ºYä¸­çš„é¡¶ç‚¹æ ‡å·ï¼Œpath[i]ä¸ºXä¸­é¡¶ç‚¹æ ‡å·
 }KM_MATCH;
 
-// ÔÚÏàµÈ×ÓÍ¼ÖĞÑ°ÕÒXiÎªÆğµãµÄÔö¹ãÂ·¾¶
+// åœ¨ç›¸ç­‰å­å›¾ä¸­å¯»æ‰¾Xiä¸ºèµ·ç‚¹çš„å¢å¹¿è·¯å¾„
 bool FindAugmentPath(KM_MATCH *km, int xi)
 {
    for(int yj = 0; yj < UNIT_COUNT; yj++) 
@@ -70,7 +70,7 @@ bool Kuhn_Munkres_Match(KM_MATCH *km)
 {
     int i, j;
     int A[UNIT_COUNT], B[UNIT_COUNT];
-    // ³õÊ¼»¯XiÓëYiµÄ¶¥±ê
+    // åˆå§‹åŒ–Xiä¸Yiçš„é¡¶æ ‡
     for(i = 0; i < UNIT_COUNT; i++) 
     {
         B[i] = 0;
@@ -82,7 +82,7 @@ bool Kuhn_Munkres_Match(KM_MATCH *km)
     }
     while(true) 
     {
-        // ³õÊ¼»¯´øÈ¨¶ş·ÖÍ¼µÄÏàµÈ×ÓÍ¼
+        // åˆå§‹åŒ–å¸¦æƒäºŒåˆ†å›¾çš„ç›¸ç­‰å­å›¾
         for(i = 0; i < UNIT_COUNT; i++)
         {
             for(j = 0; j < UNIT_COUNT; j++) 
@@ -90,7 +90,7 @@ bool Kuhn_Munkres_Match(KM_MATCH *km)
                 km->sub_map[i][j] = ((A[i]+B[j]) == km->edge[i][j]);
             }
         }
-        //Ê¹ÓÃĞÙÑÀÀûËã·¨Ñ°ÕÒÏàµÈ×ÓÍ¼µÄÍê±¸Æ¥Åä
+        //ä½¿ç”¨åŒˆç‰™åˆ©ç®—æ³•å¯»æ‰¾ç›¸ç­‰å­å›¾çš„å®Œå¤‡åŒ¹é…
         int match = 0;
         ResetMatchPath(km);
         for(int xi = 0; xi < UNIT_COUNT; xi++) 
@@ -104,12 +104,12 @@ bool Kuhn_Munkres_Match(KM_MATCH *km)
                 break;
             }
         }
-        //Èç¹ûÕÒµ½Íê±¸Æ¥Åä¾Í·µ»Ø½á¹û
+        //å¦‚æœæ‰¾åˆ°å®Œå¤‡åŒ¹é…å°±è¿”å›ç»“æœ
         if(match == UNIT_COUNT)
         {
             return true;
         }
-        //µ÷Õû¶¥±ê£¬¼ÌĞøËã·¨
+        //è°ƒæ•´é¡¶æ ‡ï¼Œç»§ç»­ç®—æ³•
         int dx = INFINITE;
         for(i = 0; i < UNIT_COUNT; i++) 
         {

@@ -57,7 +57,7 @@ void CRateLimiter::resync(unsigned long long nowMicros)
 {
     if (nowMicros > m_nextFreeTicketMicros)
     {
-        double new_permits = (nowMicros - m_nextFreeTicketMicros) / m_stableIntervalMicros; //±¾´ÎĞÂ·¢·ÅÁîÅÆÊı
+        double new_permits = (nowMicros - m_nextFreeTicketMicros) / m_stableIntervalMicros; //æœ¬æ¬¡æ–°å‘æ”¾ä»¤ç‰Œæ•°
         m_storedPermits = std::min(m_maxPermits, m_storedPermits + new_permits);
         m_nextFreeTicketMicros = nowMicros;
     }
@@ -67,19 +67,19 @@ unsigned long long CRateLimiter::reserve(double permits)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    //×ªÎªÎ¢ÃëÎªµ¥Î»
+    //è½¬ä¸ºå¾®ç§’ä¸ºå•ä½
     unsigned long long nowMicros = duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
     resync(nowMicros);
 
-    unsigned long long waitMicros = m_nextFreeTicketMicros - nowMicros; //Èç¹ûÁîÅÆ·¢·Åºó»ıÀÛÁîÅÆÊı¹»ÓÃ£¬wait ¾ÍÊÇ 0£¬·ñÔò±¾´Î¾ÍÒª wait
+    unsigned long long waitMicros = m_nextFreeTicketMicros - nowMicros; //å¦‚æœä»¤ç‰Œå‘æ”¾åç§¯ç´¯ä»¤ç‰Œæ•°å¤Ÿç”¨ï¼Œwait å°±æ˜¯ 0ï¼Œå¦åˆ™æœ¬æ¬¡å°±è¦ wait
 
-    double storedPermitsToSpend = std::min(permits, m_storedPermits); //±¾´ÎÏû·ÑµÄÁîÅÆÊı
-    double freshPermits = permits - storedPermitsToSpend;  //ÊÇ·ñĞèÒªÍ¸Ö§Ïû·Ñ
+    double storedPermitsToSpend = std::min(permits, m_storedPermits); //æœ¬æ¬¡æ¶ˆè´¹çš„ä»¤ç‰Œæ•°
+    double freshPermits = permits - storedPermitsToSpend;  //æ˜¯å¦éœ€è¦é€æ”¯æ¶ˆè´¹
 
-    unsigned long long freshPermitsMicros = (unsigned long long)(freshPermits * m_stableIntervalMicros);  //¸ù¾İÍ¸Ö§Ïû·ÑµÄÁîÅÆÊı·´ËãĞèÒªµÄÊ±¼ä
+    unsigned long long freshPermitsMicros = (unsigned long long)(freshPermits * m_stableIntervalMicros);  //æ ¹æ®é€æ”¯æ¶ˆè´¹çš„ä»¤ç‰Œæ•°åç®—éœ€è¦çš„æ—¶é—´
 
-    m_nextFreeTicketMicros += freshPermitsMicros; //Èç¹ûÕâ´ÎÓĞ³¬Ç°Ïû·Ñ£¬ÔòĞèÒª½«ÏÂ´Î·¢·ÅÁîÅÆÊ±¼äÏòºóÑÓµ½½«À´µÄÄ³¸öÊ±¼ä
-    m_storedPermits -= storedPermitsToSpend; //Ïû·ÑÖ¸¶¨ÊıÁ¿µÄÁîÅÆ
+    m_nextFreeTicketMicros += freshPermitsMicros; //å¦‚æœè¿™æ¬¡æœ‰è¶…å‰æ¶ˆè´¹ï¼Œåˆ™éœ€è¦å°†ä¸‹æ¬¡å‘æ”¾ä»¤ç‰Œæ—¶é—´å‘åå»¶åˆ°å°†æ¥çš„æŸä¸ªæ—¶é—´
+    m_storedPermits -= storedPermitsToSpend; //æ¶ˆè´¹æŒ‡å®šæ•°é‡çš„ä»¤ç‰Œ
 
     return std::max(waitMicros, 0ULL);
 }

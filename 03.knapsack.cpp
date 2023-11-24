@@ -115,16 +115,11 @@ void GreedyAlgo(KNAPSACK_PROBLEM *problem, SELECT_POLICY spFunc)
     PrintResult(problem->objs);
 }
 
-const int N = 7;   // 物品数量
-const int V = 150; // 背包容量
-int f[N + 1][V + 1];
+const int N = 7;           // 物品数量
+const int V = 150;         // 背包容量
+int f[N + 1][V + 1] = {0}; // 背包容量为V+1，装载N+1个物品的最大价值
 int Package(int *W, int *C, int N, int V)
 {
-    for (int i = 0; i <= N; i++)
-    {
-        for (int j = 1; j <= V; j++)
-            f[i][j] = 0; // 背包容量为j，装载i个物品的最大价值
-    }
     for (int i = 1; i <= N; i++)
     {
         for (int j = C[i]; j <= V; j++)
@@ -132,10 +127,10 @@ int Package(int *W, int *C, int N, int V)
             f[i][j] = max(f[i - 1][j], f[i - 1][j - C[i]] + W[i]);
             cout << "f[" << i << "][" << j << "]=" << f[i][j] << endl;
         }
+        cout << endl;
     }
     return f[N][V];
 }
-
 void DPAlgo()
 {
     int W[8] = {0, 10, 40, 30, 50, 35, 40, 30}; // 物品权重
@@ -143,18 +138,16 @@ void DPAlgo()
     int result = Package(W, C, N, V);
     if (result > 0)
     {
-        cout << endl;
         cout << "the opt value: " << result << endl;
-        int i = N, j = V;
-        while (i)
+        int j = V;
+        for (int i = N; i > 0; i--)
         {
             if (f[i][j] == (f[i - 1][j - C[i]] + W[i]))
             {
-                cout << i << ":"
+                cout << i << ": "
                      << "w=" << W[i] << ", c=" << C[i] << endl;
                 j -= C[i];
             }
-            i--;
         }
     }
     else

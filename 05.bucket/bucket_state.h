@@ -2,7 +2,7 @@
 
 const int BUCKETS_COUNT = 3;
 
-typedef struct tagACTION
+typedef struct
 {
     int from;
     int to;

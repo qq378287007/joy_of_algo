@@ -16,8 +16,7 @@ bool IsProcessedState(deque<BucketState> &states, const BucketState &newState)
     deque<BucketState>::iterator it = states.end();
 
     it = find_if(states.begin(), states.end(), bind2nd(ptr_fun(IsSameBucketState), newState));
-
-    // it = find_if(states.begin(), states.end(), bind1st(mem_fun_ref(&BucketState::IsSameState), newState));
+    //it = find_if(states.begin(), states.end(), bind1st(mem_fun_ref(&BucketState::IsSameState), newState));
 
     return (it != states.end());
 }
@@ -25,9 +24,8 @@ bool IsProcessedState(deque<BucketState> &states, const BucketState &newState)
 void PrintResult(deque<BucketState> &states)
 {
     cout << "Find Result : " << endl;
-    for_each(states.begin(), states.end(),mem_fun_ref(&BucketState::PrintStates));
-    cout << endl
-         << endl;
+    for_each(states.begin(), states.end(), mem_fun_ref(&BucketState::PrintStates));
+    cout << endl<< endl;
 }
 
 void SearchState(deque<BucketState> &states);
@@ -59,12 +57,8 @@ void SearchState(deque<BucketState> &states)
 
     /*使用两重循环排列组合6种倒水状态*/
     for (int j = 0; j < BUCKETS_COUNT; ++j)
-    {
         for (int i = 0; i < BUCKETS_COUNT; ++i)
-        {
             SearchStateOnAction(states, current, i, j);
-        }
-    }
 }
 
 int main()
@@ -75,7 +69,7 @@ int main()
     states.push_back(init);
     SearchState(states);
 
-    assert(states.size() == 1); //穷举结束后states应该还是只有一个初始状态
+    assert(states.size() == 1); // 穷举结束后states应该还是只有一个初始状态
 
     return 0;
 }

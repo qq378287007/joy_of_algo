@@ -129,7 +129,6 @@ string ClassifyResult(const TRAINING_RESULT &tr, const vector<string> &allWords,
 int main()
 {
     vector<string> allWords = MakeAllWordsList(examples);
-
     TRAINING_RESULT tr = TrainingExample(allWords, examples);
 
     // vector<string> testWords = { "公司", "讨论", "单元测试", "覆盖率", "错误", "成功" };

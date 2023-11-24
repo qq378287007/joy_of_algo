@@ -65,9 +65,7 @@ void BucketState::SetAction(int w, int f, int t)
 void BucketState::SetBuckets(const int *buckets)
 {
     for (int i = 0; i < BUCKETS_COUNT; ++i)
-    {
         bucket_s[i] = buckets[i];
-    }
 }
 
 bool BucketState::IsBucketEmpty(int bucket)
@@ -91,9 +89,7 @@ void BucketState::PrintStates()
     cout << "buckets water states is : ";
 
     for (int i = 0; i < BUCKETS_COUNT; ++i)
-    {
         cout << bucket_s[i] << " ";
-    }
     cout << endl;
 }
 
@@ -109,10 +105,7 @@ bool BucketState::CanTakeDumpAction(int from, int to)
     /*不是同一个桶，且from桶中有水，且to桶中不满*/
 
     if ((from != to) && !IsBucketEmpty(from) && !IsBucketFull(to))
-    {
         return true;
-    }
-
     return false;
 }
 

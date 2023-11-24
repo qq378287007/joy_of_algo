@@ -16,7 +16,7 @@ typedef struct
 MEMO_RECORD memo[MAX_STRING_LEN][MAX_STRING_LEN];
 
 static int recC = 0;
-int EditDistance(char *src, char *dest, int i, int j)
+int EditDistance(const char *src, const char *dest, int i, int j)
 {
     recC++;
     if (memo[i][j].refCount != 0) // 查表，直接返回
@@ -54,7 +54,7 @@ int EditDistance(char *src, char *dest, int i, int j)
     return distance;
 }
 
-int EditDistance2(char *src, char *dest)
+int EditDistance2(const char *src, const char *dest)
 {
     if ((strlen(src) == 0) || (strlen(dest) == 0))
         return abs((int)strlen(src) - (int)strlen(dest));
@@ -69,7 +69,7 @@ int EditDistance2(char *src, char *dest)
     return __min(__min(edIns, edDel), edRep);
 }
 
-int EditDistance3(char *src, char *dest)
+int EditDistance3(const char *src, const char *dest)
 {
     int i, j;
     int d[MAX_STRING_LEN][MAX_STRING_LEN] = {0xFFFF};
@@ -101,7 +101,7 @@ int EditDistance3(char *src, char *dest)
     return d[strlen(src)][strlen(dest)];
 }
 
-int main(int argc, char *argv[])
+int main()
 {
     for (int i = 0; i < MAX_STRING_LEN; i++)
     {
