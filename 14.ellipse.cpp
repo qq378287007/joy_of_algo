@@ -1,76 +1,77 @@
-// ellipse.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
 #include <math.h>
-#include "ellipse.h"
-#include "dev_adp.h"
 
-#define ROUND_INT(f)     (int)((f) + 0.5)
+#define ROUND_INT(f) (int)((f) + 0.5)
 
-
-void EllipsePlot(int xc,int yc, int x, int y)
+static const int gDevWidth = 1280;
+static const int gDevHeight = 800;
+static int data[gDevHeight][gDevWidth] = {0};
+static void SetDevicePixel(int x, int y)
 {
-    SetDevicePixel(xc+x,yc+y);
-    SetDevicePixel(xc-x,yc+y);
-    SetDevicePixel(xc+x,yc-y);
-    SetDevicePixel(xc-x,yc-y);
+    data[x][y] = 1;
 }
 
-void MP_Ellipse(int xc , int yc , int a, int b)
-{  
+void EllipsePlot(int xc, int yc, int x, int y)
+{
+    SetDevicePixel(xc + x, yc + y);
+    SetDevicePixel(xc - x, yc + y);
+    SetDevicePixel(xc + x, yc - y);
+    SetDevicePixel(xc - x, yc - y);
+}
+
+void MP_Ellipse(int xc, int yc, int a, int b)
+{
     double sqa = a * a;
     double sqb = b * b;
-    
+
     double d = sqb + sqa * (-b + 0.25);
-    int x = 0; 
+    int x = 0;
     int y = b;
     EllipsePlot(xc, yc, x, y);
-    while( sqb * (x + 1) < sqa * (y - 0.5))
-    {     
-        if (d < 0)
+    while (sqb * (x + 1) < sqa * (y - 0.5))
+    {
+        if (d < 0.0)
         {
-            d += sqb * (2 * x + 3); 
+            d += sqb * (2 * x + 3);
         }
-        else  
-        {  
+        else
+        {
             d += (sqb * (2 * x + 3) + sqa * (-2 * y + 2));
-            y--;	
-        } 
-        x++;  
+            y--;
+        }
+        x++;
         EllipsePlot(xc, yc, x, y);
     }
     d = (b * (x + 0.5)) * 2 + (a * (y - 1)) * 2 - (a * b) * 2;
-    while(y > 0)
-    {  
-        if (d < 0) 
-        { 
-            d += sqb * (2 * x + 2) + sqa * (-2 * y + 3);
-            x++;  
-        }
-        else  
+    while (y > 0)
+    {
+        if (d < 0.0)
         {
-            d += sqa * (-2 * y + 3);  
+            d += sqb * (2 * x + 2) + sqa * (-2 * y + 3);
+            x++;
         }
-        y--; 
+        else
+        {
+            d += sqa * (-2 * y + 3);
+        }
+        y--;
         EllipsePlot(xc, yc, x, y);
     }
 }
 
-/*BresenhamËã·¨*/
-void Bresenham_Ellipse(int xc , int yc , int a, int b)
-{ 
+// Bresenhamç®—æ³•
+void Bresenham_Ellipse(int xc, int yc, int a, int b)
+{
     int sqa = a * a;
     int sqb = b * b;
-    
+
     int x = 0;
     int y = b;
     int d = 2 * sqb - 2 * b * sqa + sqa;
     EllipsePlot(xc, yc, x, y);
-    int P_x = ROUND_INT( (double)sqa/sqrt((double)(sqa+sqb)) );
-    while(x <= P_x)
+    int P_x = ROUND_INT((double)sqa / sqrt((double)(sqa + sqb)));
+    while (x <= P_x)
     {
-        if(d < 0)
+        if (d < 0)
         {
             d += 2 * sqb * (2 * x + 3);
         }
@@ -84,35 +85,35 @@ void Bresenham_Ellipse(int xc , int yc , int a, int b)
     }
 
     d = sqb * (x * x + x) + sqa * (y * y - y) - sqa * sqb;
-    while(y >= 0)
-    { 
+    while (y >= 0)
+    {
         EllipsePlot(xc, yc, x, y);
         y--;
-        if(d < 0)
-        { 
-            x++; 
-            d = d - 2 * sqa * y - sqa + 2 * sqb * x + 2 * sqb; 
+        if (d < 0)
+        {
+            x++;
+            d = d - 2 * sqa * y - sqa + 2 * sqb * x + 2 * sqb;
         }
         else
-        { 
-            d = d - 2 * sqa * y - sqa; 
-        } 
-    } 
+        {
+            d = d - 2 * sqa * y - sqa;
+        }
+    }
 }
 
-void Bresenham_Ellipse2(int xc , int yc , int a, int b)
-{ 
+void Bresenham_Ellipse2(int xc, int yc, int a, int b)
+{
     int sqa = a * a;
     int sqb = b * b;
-    
+
     int x = 0;
     int y = b;
     int d = 4 * (sqb - b * sqa) + sqa;
     EllipsePlot(xc, yc, x, y);
-    int P_x = ROUND_INT( (double)sqa/sqrt((double)(sqa+sqb)) );
-    while(x <= P_x)
+    int P_x = ROUND_INT((double)sqa / sqrt((double)(sqa + sqb)));
+    while (x <= P_x)
     {
-        if(d <= 0)
+        if (d <= 0)
         {
             d += 4 * sqb * (2 * x + 3);
         }
@@ -126,20 +127,20 @@ void Bresenham_Ellipse2(int xc , int yc , int a, int b)
     }
 
     d = sqb * (x * x + x) + sqa * (y * y - y) - sqa * sqb;
-    while(y >= 0)
-    { 
+    while (y >= 0)
+    {
         EllipsePlot(xc, yc, x, y);
         y--;
-        if(d <= 0)
-        { 
-            x++; 
-            d = d - 2 * sqa * y - sqa + 2 * sqb * x + 2 * sqb; 
+        if (d <= 0)
+        {
+            x++;
+            d = d - 2 * sqa * y - sqa + 2 * sqb * x + 2 * sqb;
         }
         else
-        { 
-            d = d - 2 * sqa * y - sqa; 
-        } 
-    } 
+        {
+            d = d - 2 * sqa * y - sqa;
+        }
+    }
 }
 
 #if 0
@@ -151,7 +152,7 @@ void Bresenham_Ellipse(int xc , int yc , int a, int b)
     int P_x = ROUND_INT( (double)sqa/sqrt((double)(sqa+sqb)) );
     int P_y = ROUND_INT( (double)sqb/sqrt((double)(sqa+sqb)) );
 
-    /* Éú³ÉµÚÒ»ÏóÏÞÄÚµÄÉÏ°ë²¿·ÖÍÖÔ²»¡ */
+    // ç”Ÿæˆç¬¬ä¸€è±¡é™å†…çš„ä¸ŠåŠéƒ¨åˆ†æ¤­åœ†å¼§
     int x = 0;
     int y = b;
     int d = 4 * (sqb - b * sqa) + sqa;
@@ -170,7 +171,7 @@ void Bresenham_Ellipse(int xc , int yc , int a, int b)
         x++;
         EllipsePlot(xc, yc, x, y);
     }
-    /* Éú³ÉµÚÒ»ÏóÏÞÄÚµÄÏÂ°ë²¿·ÖÍÖÔ²»¡ */
+    // ç”Ÿæˆç¬¬ä¸€è±¡é™å†…çš„ä¸‹åŠéƒ¨åˆ†æ¤­åœ†å¼§
     x = a;
     y = 0;
     d = 4 * (sqa - a * sqb) + sqb;
@@ -191,3 +192,8 @@ void Bresenham_Ellipse(int xc , int yc , int a, int b)
     }
 }
 #endif
+
+int main()
+{
+    return 0;
+}
