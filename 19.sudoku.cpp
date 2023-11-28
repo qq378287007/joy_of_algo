@@ -1,8 +1,7 @@
-// bucket.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
-
+#include <set>
+#include <iterator>
+#include <cassert>
+#include <iostream>
 using namespace std;
 
 const int PLACE_HOLDER_VALUE = 0;
@@ -19,11 +18,9 @@ const unsigned int SKD_CELL_COUNT = SKD_ROW_LIMIT * SKD_COL_LIMIT;
 const unsigned int SKD_BLOCK_COUNT = SKD_BLOCK_ROW_LIMIT * SKD_BLOCK_COL_LIMIT;
 const int NUM_COUNT = 9;
 
-
 #if 0
-//÷–µ»ƒ—∂»£¨◊Ó¥Ûµ›πÈ…Ó∂»4
-int sudoku_numbers1[SKD_CELL_COUNT] = 
-{
+//‰∏≠Á≠âÈöæÂ∫¶ÔºåÊúÄÂ§ßÈÄíÂΩíÊ∑±Â∫¶4
+int sudoku_numbers1[SKD_CELL_COUNT] = {
     0, 0, 0, 0, 9, 0, 6, 0, 0,
     0, 0, 0, 5, 0, 8, 0, 4, 1,
     0, 0, 7, 0, 0, 0, 0, 0, 0,
@@ -32,8 +29,7 @@ int sudoku_numbers1[SKD_CELL_COUNT] =
     2, 8, 0, 1, 0, 0, 0, 5, 0,
     9, 4, 0, 8, 2, 0, 1, 7, 0,
     1, 3, 8, 7, 0, 0, 0, 9, 0,
-    7, 6, 0, 0, 0, 3, 0, 0, 5
-};
+    7, 6, 0, 0, 0, 3, 0, 0, 5};
 /*
 8    5    1    2    9    4    6    3    7
 
@@ -56,9 +52,8 @@ int sudoku_numbers1[SKD_CELL_COUNT] =
 #endif
 
 #if 0
-//ºÚµ•£¨ª˘¥°≈≈≥˝∑®∏„∂®
-int sudoku_numbers1[SKD_CELL_COUNT] = 
-{
+//ÁÆÄÂçïÔºåÂü∫Á°ÄÊéíÈô§Ê≥ïÊêûÂÆö
+int sudoku_numbers1[SKD_CELL_COUNT] = {
     0, 0, 6, 8, 0, 2, 7, 5, 0,
     8, 9, 0, 0, 3, 5, 0, 0, 1,
     2, 0, 0, 9, 0, 0, 0, 0, 6,
@@ -67,8 +62,7 @@ int sudoku_numbers1[SKD_CELL_COUNT] =
     1, 0, 0, 0, 6, 3, 0, 4, 0,
     6, 0, 0, 0, 0, 0, 0, 7, 0,
     5, 4, 0, 0, 2, 0, 8, 1, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 4
-};
+    0, 0, 0, 0, 0, 0, 0, 0, 4};
 /*
 4    3    6    8    1    2    7    5    9
 
@@ -91,9 +85,8 @@ int sudoku_numbers1[SKD_CELL_COUNT] =
 #endif
 
 #if 1
-//Ωœƒ—£¨◊Ó¥Ûµ›πÈ…Ó∂»11
-int sudoku_numbers1[SKD_CELL_COUNT] = 
-{
+// ËæÉÈöæÔºåÊúÄÂ§ßÈÄíÂΩíÊ∑±Â∫¶11
+int sudoku_numbers1[SKD_CELL_COUNT] = {
     0, 0, 0, 0, 0, 6, 0, 0, 1,
     9, 0, 0, 0, 0, 0, 3, 7, 6,
     7, 1, 0, 0, 4, 0, 0, 0, 0,
@@ -102,8 +95,7 @@ int sudoku_numbers1[SKD_CELL_COUNT] =
     6, 0, 0, 0, 0, 3, 0, 5, 8,
     0, 0, 0, 0, 3, 0, 0, 6, 5,
     3, 5, 1, 0, 0, 0, 0, 0, 2,
-    8, 0, 0, 1, 0, 0, 0, 0, 0
-};
+    8, 0, 0, 1, 0, 0, 0, 0, 0};
 /*
 5    8    3    9    7    6    4    2    1
 
@@ -124,19 +116,18 @@ int sudoku_numbers1[SKD_CELL_COUNT] =
 8    6    2    1    9    5    7    3    4
 */
 #endif
-typedef struct 
+typedef struct
 {
     int num;
     bool fixed;
-    std::set<int> candidators;
-}SUDOKU_CELL;
+    set<int> candidators;
+} SUDOKU_CELL;
 
 typedef struct
 {
     SUDOKU_CELL cells[SKD_ROW_LIMIT][SKD_COL_LIMIT];
     int fixedCount;
-}SUDOKU_GAME;
-
+} SUDOKU_GAME;
 
 static int RoundBlockNumber(int row, int col)
 {
@@ -150,36 +141,24 @@ static void InitSudokuCell(SUDOKU_CELL *cell, int num)
     cell->num = num;
     cell->fixed = (num != PLACE_HOLDER_VALUE) ? true : false;
     cell->candidators.clear();
-    if(!cell->fixed)
-    {
-        copy(allNumber, allNumber + NUM_COUNT, 
-             std::insert_iterator<std::set<int> >(cell->candidators, cell->candidators.begin()));
-    }
+    if (!cell->fixed)
+        copy(allNumber, allNumber + NUM_COUNT, insert_iterator<set<int>>(cell->candidators, cell->candidators.begin()));
 }
 
 bool CheckValidCandidator(SUDOKU_GAME *game, int row, int col, int num)
 {
-    for(int i = 0; i < SKD_COL_LIMIT; i++)
-    {
-        if((i != col) && (game->cells[row][i].num == num))
+    for (int i = 0; i < SKD_COL_LIMIT; i++)
+        if (i != col && game->cells[row][i].num == num)
             return false;
-    }
-    for(int j = 0; j < SKD_ROW_LIMIT; j++)
-    {
-        if((j != row) && (game->cells[j][col].num == num))
+    for (int j = 0; j < SKD_ROW_LIMIT; j++)
+        if (j != row && game->cells[j][col].num == num)
             return false;
-    }
     int rs = (row / SKD_BLOCK_ROW_LIMIT) * SKD_BLOCK_ROW_LIMIT;
     int cs = (col / SKD_BLOCK_COL_LIMIT) * SKD_BLOCK_COL_LIMIT;
-    for(int r = rs; r < SKD_BLOCK_COL_LIMIT; r++)
-    {
-        for(int c = cs; c < SKD_BLOCK_ROW_LIMIT; c++)
-        {
-            if(!((r == row) && (c == col)) && (game->cells[r][c].num == num))
+    for (int r = rs; r < SKD_BLOCK_COL_LIMIT; r++)
+        for (int c = cs; c < SKD_BLOCK_ROW_LIMIT; c++)
+            if (!(r == row && c == col) && game->cells[r][c].num == num)
                 return false;
-        }
-    }
-
     return true;
 }
 
@@ -187,16 +166,15 @@ static bool SwitchCellToFixedSC(SUDOKU_GAME *game, int row, int col)
 {
     SUDOKU_CELL *cell = &game->cells[row][col];
     assert(cell->candidators.size() == 1);
-    if(CheckValidCandidator(game, row, col, *(cell->candidators.begin())))
+    if (CheckValidCandidator(game, row, col, *(cell->candidators.begin())))
     {
         cell->num = *(cell->candidators.begin());
-        if((row == 1)&&(col==1)&(cell->num==8))
-        {
+        if ((row == 1) && (col == 1) & (cell->num == 8))
             int sss = 0;
-        }
+
         cell->fixed = true;
         cell->candidators.clear();
-        //std::cout << "set[" << row << "][" << col << "] = " << cell->num << std::endl;
+        // cout << "set[" << row << "][" << col << "] = " << cell->num << endl;
         return true;
     }
 
@@ -206,12 +184,12 @@ static bool SwitchCellToFixedSC(SUDOKU_GAME *game, int row, int col)
 static bool SwitchCellToFixed(SUDOKU_GAME *game, int row, int col, int num)
 {
     SUDOKU_CELL *cell = &game->cells[row][col];
-    if(CheckValidCandidator(game, row, col, num))
+    if (CheckValidCandidator(game, row, col, num))
     {
         cell->num = num;
         cell->fixed = true;
         cell->candidators.clear();
-        //std::cout << "set[" << row << "][" << col << "] = " << num << std::endl;
+        // cout << "set[" << row << "][" << col << "] = " << num << endl;
         return true;
     }
 
@@ -221,46 +199,46 @@ static bool SwitchCellToFixed(SUDOKU_GAME *game, int row, int col, int num)
 void InitSudokuGame(SUDOKU_GAME *game, int *numbers)
 {
     game->fixedCount = 0;
-    for(int i = 0; i < SKD_CELL_COUNT; i++)
+    for (int i = 0; i < SKD_CELL_COUNT; i++)
     {
         int row = i / SKD_COL_LIMIT;
         int col = i % SKD_COL_LIMIT;
         InitSudokuCell(&game->cells[row][col], numbers[i]);
-        if(game->cells[row][col].fixed)
+        if (game->cells[row][col].fixed)
             game->fixedCount++;
     }
 }
 
 void PrintSudokuGame(SUDOKU_GAME *game)
 {
-    std::cout << std::endl;
-    for(int row = 0; row < SKD_ROW_LIMIT; row++)
+    cout << endl;
+    for (int row = 0; row < SKD_ROW_LIMIT; row++)
     {
-        for(int col = 0; col < SKD_COL_LIMIT; col++)
-        {
-            std::cout << game->cells[row][col].num << "    ";
-        }
-        std::cout << std::endl << std::endl;
+        for (int col = 0; col < SKD_COL_LIMIT; col++)
+            cout << game->cells[row][col].num << "    ";
+
+        cout << endl
+             << endl;
     }
 }
 
 void DebugPrintSudokuGame(SUDOKU_GAME *game)
 {
-    std::cout << std::endl;
-    for(int row = 0; row < SKD_ROW_LIMIT; row++)
+    cout << endl;
+    for (int row = 0; row < SKD_ROW_LIMIT; row++)
     {
-        for(int col = 0; col < SKD_COL_LIMIT; col++)
+        for (int col = 0; col < SKD_COL_LIMIT; col++)
         {
-            if(!game->cells[row][col].fixed)
+            if (!game->cells[row][col].fixed)
             {
-                std::cout << "[" << row + 1 << "][" << col + 1 << "] = {";
-                std::set<int>::iterator it = game->cells[row][col].candidators.begin();
-                while(it != game->cells[row][col].candidators.end())
+                cout << "[" << row + 1 << "][" << col + 1 << "] = {";
+                set<int>::iterator it = game->cells[row][col].candidators.begin();
+                while (it != game->cells[row][col].candidators.end())
                 {
-                    std::cout << *it << ",";
+                    cout << *it << ",";
                     it++;
                 }
-                std::cout << "}" << std::endl;
+                cout << "}" << endl;
             }
         }
     }
@@ -277,15 +255,15 @@ bool SingleBlockExclusive(SUDOKU_GAME *game, int block, int num);
 
 bool SinglesCandidature(SUDOKU_GAME *game, int row, int col)
 {
-    if(!SwitchCellToFixedSC(game, row, col))
+    if (!SwitchCellToFixedSC(game, row, col))
         return false;
 
-    if(!SingleRowExclusive(game, row, game->cells[row][col].num))
+    if (!SingleRowExclusive(game, row, game->cells[row][col].num))
         return false;
-    if(!SingleColumnExclusive(game, col, game->cells[row][col].num))
+    if (!SingleColumnExclusive(game, col, game->cells[row][col].num))
         return false;
     int block = RoundBlockNumber(row, col);
-    if(!SingleBlockExclusive(game, block, game->cells[row][col].num))
+    if (!SingleBlockExclusive(game, block, game->cells[row][col].num))
         return false;
 
     game->fixedCount++;
@@ -294,31 +272,29 @@ bool SinglesCandidature(SUDOKU_GAME *game, int row, int col)
 
 bool SetCandidatorTofixed(SUDOKU_GAME *game, int row, int col, int num)
 {
-    if(!SwitchCellToFixed(game, row, col, num))
+    if (!SwitchCellToFixed(game, row, col, num))
         return false;
 
-    if(!SingleRowExclusive(game, row, game->cells[row][col].num))
+    if (!SingleRowExclusive(game, row, game->cells[row][col].num))
         return false;
-    if(!SingleColumnExclusive(game, col, game->cells[row][col].num))
+    if (!SingleColumnExclusive(game, col, game->cells[row][col].num))
         return false;
     int block = RoundBlockNumber(row, col);
-    if(!SingleBlockExclusive(game, block, game->cells[row][col].num))
+    if (!SingleBlockExclusive(game, block, game->cells[row][col].num))
         return false;
-    
+
     game->fixedCount++;
     return true;
 }
 
 bool RemoveCellCandidator(SUDOKU_GAME *game, int row, int col, int num)
 {
-    if(!game->cells[row][col].fixed)
+    if (!game->cells[row][col].fixed)
     {
         game->cells[row][col].candidators.erase(num);
-        if(game->cells[row][col].candidators.size() == 1)
-        {
-            if(!SinglesCandidature(game, row, col))
+        if (game->cells[row][col].candidators.size() == 1)
+            if (!SinglesCandidature(game, row, col))
                 return false;
-        }
     }
 
     return true;
@@ -326,41 +302,30 @@ bool RemoveCellCandidator(SUDOKU_GAME *game, int row, int col, int num)
 
 static bool IsCellHasCandidator(SUDOKU_CELL *cell, int num)
 {
-    if(cell->fixed)
+    if (cell->fixed)
         return false;
 
-    if(cell->candidators.find(num) != cell->candidators.end())
+    if (cell->candidators.find(num) != cell->candidators.end())
         return true;
 
     return false;
 }
 
-
 bool SingleRowExclusive(SUDOKU_GAME *game, int row, int num)
 {
-    for(int i = 0; i < SKD_COL_LIMIT; i++)
-    {
-        if(IsCellHasCandidator(&game->cells[row][i], num))
-        {
-            if(!RemoveCellCandidator(game, row, i, num))
+    for (int i = 0; i < SKD_COL_LIMIT; i++)
+        if (IsCellHasCandidator(&game->cells[row][i], num))
+            if (!RemoveCellCandidator(game, row, i, num))
                 return false;
-        }
-    }
-
     return true;
 }
 
 bool SingleColumnExclusive(SUDOKU_GAME *game, int col, int num)
 {
-    for(int i = 0; i < SKD_ROW_LIMIT; i++)
-    {
-        if(IsCellHasCandidator(&game->cells[i][col], num))
-        {
-            if(!RemoveCellCandidator(game, i, col, num))
+    for (int i = 0; i < SKD_ROW_LIMIT; i++)
+        if (IsCellHasCandidator(&game->cells[i][col], num))
+            if (!RemoveCellCandidator(game, i, col, num))
                 return false;
-        }
-    }
-
     return true;
 }
 
@@ -369,41 +334,37 @@ bool SingleBlockExclusive(SUDOKU_GAME *game, int block, int num)
     int r = (block / SKD_BLOCK_ROW_LIMIT) * SKD_BLOCK_COL_LIMIT;
     int c = (block % SKD_BLOCK_ROW_LIMIT) * SKD_BLOCK_ROW_LIMIT;
 
-    for(int i = 0; i < SKD_BLOCK_LIMIT; ++i)
+    for (int i = 0; i < SKD_BLOCK_LIMIT; ++i)
     {
         int row = r + i / SKD_BLOCK_ROW_LIMIT;
         int col = c + i % SKD_BLOCK_ROW_LIMIT;
-        if(IsCellHasCandidator(&game->cells[row][col], num))
-        {
-            if(!RemoveCellCandidator(game, row, col, num))
+        if (IsCellHasCandidator(&game->cells[row][col], num))
+            if (!RemoveCellCandidator(game, row, col, num))
                 return false;
-        }
     }
-
     return true;
 }
 
 void CopyGameState(SUDOKU_GAME *game, SUDOKU_GAME *new_game)
 {
     new_game->fixedCount = game->fixedCount;
-    for(int i = 0; i < SKD_CELL_COUNT; i++)
+    for (int i = 0; i < SKD_CELL_COUNT; i++)
     {
         int row = i / SKD_COL_LIMIT;
         int col = i % SKD_COL_LIMIT;
         new_game->cells[row][col].fixed = game->cells[row][col].fixed;
         new_game->cells[row][col].num = game->cells[row][col].num;
         new_game->cells[row][col].candidators.clear();
-        copy(game->cells[row][col].candidators.begin(), 
+        copy(game->cells[row][col].candidators.begin(),
              game->cells[row][col].candidators.end(),
-             std::insert_iterator<std::set<int> >(new_game->cells[row][col].candidators, 
-                                                  new_game->cells[row][col].candidators.begin()));
+             insert_iterator<set<int>>(new_game->cells[row][col].candidators, new_game->cells[row][col].candidators.begin()));
     }
 }
 
 bool SwitchToNextState(SUDOKU_GAME *game, int row, int col, int num, SUDOKU_GAME *new_game)
 {
     CopyGameState(game, new_game);
-    
+
     return SetCandidatorTofixed(new_game, row, col, num);
 }
 
@@ -412,33 +373,33 @@ static int ddd = 0;
 void FindSudokuSolution(SUDOKU_GAME *game, int sp)
 {
     static int rc = 0;
-    if(game->fixedCount == SKD_CELL_COUNT)
+    if (game->fixedCount == SKD_CELL_COUNT)
     {
         rc++;
-        std::cout << "Find result " << rc << "  (ddd = " << ddd << "):" << std::endl;
+        cout << "Find result " << rc << "  (ddd = " << ddd << "):" << endl;
         PrintSudokuGame(game);
         return;
     }
 
     int row = sp / SKD_COL_LIMIT;
     int col = sp % SKD_COL_LIMIT;
-    while((sp < SKD_CELL_COUNT) && game->cells[row][col].fixed)
+    while ((sp < SKD_CELL_COUNT) && game->cells[row][col].fixed)
     {
         sp++;
         row = sp / SKD_COL_LIMIT;
         col = sp % SKD_COL_LIMIT;
     }
-    if(sp < SKD_CELL_COUNT)
+    if (sp < SKD_CELL_COUNT)
     {
         SUDOKU_CELL *curCell = &game->cells[row][col];
         SUDOKU_GAME new_state;
-        std::set<int>::iterator it = curCell->candidators.begin();
-        while(it != curCell->candidators.end())
+        set<int>::iterator it = curCell->candidators.begin();
+        while (it != curCell->candidators.end())
         {
-            if(SwitchToNextState(game, row, col, *it, &new_state))
+            if (SwitchToNextState(game, row, col, *it, &new_state))
             {
-                //PrintSudokuGame(&new_state);
-                //DebugPrintSudokuGame(&new_state);
+                // PrintSudokuGame(&new_state);
+                // DebugPrintSudokuGame(&new_state);
                 ddd++;
                 FindSudokuSolution(&new_state, sp + 1);
                 ddd--;
@@ -450,11 +411,11 @@ void FindSudokuSolution(SUDOKU_GAME *game, int sp)
 
 void BaseExclusive(SUDOKU_GAME *game)
 {
-    for(int i = 0; i < SKD_CELL_COUNT; i++)
+    for (int i = 0; i < SKD_CELL_COUNT; i++)
     {
         int row = i / SKD_COL_LIMIT;
         int col = i % SKD_COL_LIMIT;
-        if(game->cells[row][col].fixed)
+        if (game->cells[row][col].fixed)
         {
             SingleRowExclusive(game, row, game->cells[row][col].num);
             SingleColumnExclusive(game, col, game->cells[row][col].num);
@@ -464,20 +425,18 @@ void BaseExclusive(SUDOKU_GAME *game)
     }
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     SUDOKU_GAME game;
     InitSudokuGame(&game, sudoku_numbers1);
     PrintSudokuGame(&game);
 
     BaseExclusive(&game);
-    //SinglesCandidature(&game);
-    //PrintSudokuGame(&game);
-    //DebugPrintSudokuGame(&game);
+    // SinglesCandidature(&game);
+    // PrintSudokuGame(&game);
+    // DebugPrintSudokuGame(&game);
 
     FindSudokuSolution(&game, 0);
 
     return 0;
 }
-
-

@@ -1,15 +1,12 @@
-#include "stdafx.h"
+#include <cmath>
+using namespace std;
+
 #include "Common.h"
 
-
-bool IsPrecisionZero(double value)
+static const double PRECISION = 1E-10;
+inline bool IsPrecisionZero(double value)
 {
-    if(std::fabs(value) < PRECISION)
-    {
-        return true;
-    }
-
-    return false;
+    return fabs(value) < PRECISION;
 }
 
 

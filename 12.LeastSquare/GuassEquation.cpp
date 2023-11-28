@@ -1,29 +1,24 @@
-#include "stdafx.h"
+#include <cassert>
+#include <iostream>
+
 #include "Common.h"
 #include "GuassEquation.h"
 
-GuassEquation::GuassEquation(int M) 
-{ 
+GuassEquation::GuassEquation(int M, double *A, double *b)
+{
     m_matrixA = NULL;
     m_bVal = NULL;
-    Init(M, NULL, NULL); 
-}
-
-GuassEquation::GuassEquation(int M, double *A, double *b) 
-{ 
-    m_matrixA = NULL;
-    m_bVal = NULL;
-    Init(M, A, b); 
+    Init(M, A, b);
 }
 
 GuassEquation::~GuassEquation()
 {
-    if(m_matrixA)
+    if (m_matrixA)
     {
         delete[] m_matrixA;
         m_matrixA = NULL;
     }
-    if(m_bVal)
+    if (m_bVal)
     {
         delete[] m_bVal;
         m_bVal = NULL;
@@ -32,23 +27,20 @@ GuassEquation::~GuassEquation()
 
 void GuassEquation::Init(int M, double *A, double *b)
 {
-    assert((m_matrixA == NULL) && (m_bVal == NULL));
-    
+    assert(m_matrixA == NULL && m_bVal == NULL);
+
     m_DIM = M;
     m_matrixA = new double[m_DIM * m_DIM];
-    if(m_matrixA)
+    if (m_matrixA)
     {
         m_bVal = new double[m_DIM];
-        if(m_bVal)
+        if (m_bVal)
         {
-            if(A)
-            {
+            if (A)
                 memcpy(m_matrixA, A, sizeof(double) * m_DIM * m_DIM);
-            }
-            if(b)
-            {
+
+            if (b)
                 memcpy(m_bVal, b, sizeof(double) * m_DIM);
-            }
         }
         else
         {
@@ -58,64 +50,58 @@ void GuassEquation::Init(int M, double *A, double *b)
     }
 }
 
-double& GuassEquation::operator()(int row, int col)
+double &GuassEquation::operator()(int row, int col)
 {
-    assert((row < m_DIM) && (col < m_DIM));
-    
-    double (*rowPtr)[] = (double (*)[])m_matrixA;
+    assert(row < m_DIM && col < m_DIM);
+
+    double(*rowPtr)[] = (double(*)[])m_matrixA;
     return *(m_matrixA + row * m_DIM + col);
 }
 
-const double& GuassEquation::operator()(int row, int col) const
+const double &GuassEquation::operator()(int row, int col) const
 {
-    assert((row < m_DIM) && (col < m_DIM));
+    assert(row < m_DIM && col < m_DIM);
 
     return *(m_matrixA + row * m_DIM + col);
 }
 
-/*¥¯¡–÷˜‘™µƒ∏ﬂÀπœ˚»•∑®Ω‚∑Ω≥Ã◊È£¨◊Ó∫ÛµƒΩ‚‘⁄matrixAµƒ∂‘Ω«œﬂ…œ*/
-bool GuassEquation::Resolve(std::vector<double>& xValue)
+//Â∏¶Âàó‰∏ªÂÖÉÁöÑÈ´òÊñØÊ∂àÂéªÊ≥ïËß£ÊñπÁ®ãÁªÑÔºåÊúÄÂêéÁöÑËß£Âú®matrixAÁöÑÂØπËßíÁ∫ø‰∏ä
+bool GuassEquation::Resolve(vector<double> &xValue)
 {
     assert(xValue.size() == m_DIM);
 
-    /*œ˚‘™£¨µ√µΩ…œ»˝Ω«’Û*/
-    for(int i = 0; i < m_DIM - 1; i++)
+    //Ê∂àÂÖÉÔºåÂæóÂà∞‰∏ä‰∏âËßíÈòµ
+    for (int i = 0; i < m_DIM - 1; i++)
     {
-        /*∞¥¡–—°÷˜‘™*/
+        //ÊåâÂàóÈÄâ‰∏ªÂÖÉ
         int pivotRow = SelectPivotalElement(i);
-        if(pivotRow != i)/*»Áπ˚”–±ÿ“™£¨Ωªªª––*/
-        {
+        if (pivotRow != i) //Â¶ÇÊûúÊúâÂøÖË¶ÅÔºå‰∫§Êç¢Ë°å
             SwapRow(i, pivotRow);
-        }
-        if(IsPrecisionZero(m_matrixA[i * m_DIM + i])) /*÷˜‘™ «0? ≤ª¥Ê‘⁄Œ®“ªΩ‚*/
-        {
+        
+        if (IsPrecisionZero(m_matrixA[i * m_DIM + i])) //‰∏ªÂÖÉÊòØ0? ‰∏çÂ≠òÂú®ÂîØ‰∏ÄËß£
             return false;
-        }
-        /*∂‘œµ ˝πÈ“ªªØ¥¶¿Ì£¨ π––µ⁄“ª∏ˆœµ ˝ «1.0*/
+        
+        //ÂØπÁ≥ªÊï∞ÂΩí‰∏ÄÂåñÂ§ÑÁêÜÔºå‰ΩøË°åÁ¨¨‰∏Ä‰∏™Á≥ªÊï∞ÊòØ1.0
         SimplePivotalRow(i, i);
-        /*÷––Ω¯––œ˚‘™*/
-        for(int j = i + 1; j < m_DIM; j++)
-        {
+
+        //ÈÄêË°åËøõË°åÊ∂àÂÖÉ
+        for (int j = i + 1; j < m_DIM; j++)
             RowElimination(i, j, i);
-        }
     }
-    /*ªÿ¥˙«ÛΩ‚*/
+    //Âõû‰ª£Ê±ÇËß£
     m_matrixA[(m_DIM - 1) * m_DIM + m_DIM - 1] = m_bVal[m_DIM - 1] / m_matrixA[(m_DIM - 1) * m_DIM + m_DIM - 1];
-    for(int i = m_DIM - 2; i >= 0; i--)
+    for (int i = m_DIM - 2; i >= 0; i--)
     {
         double totalCof = 0.0;
-        for(int j = i + 1; j < m_DIM; j++)
-        {
+        for (int j = i + 1; j < m_DIM; j++)
             totalCof += m_matrixA[i * m_DIM + j] * m_matrixA[j * m_DIM + j];
-        }
+        
         m_matrixA[i * m_DIM + i] = (m_bVal[i] - totalCof) / m_matrixA[i * m_DIM + i];
     }
 
-    /*Ω´∂‘Ω«œﬂ‘™ÀÿµƒΩ‚÷∏ˆ¥Ê»ÎΩ‚œÚ¡ø*/
-    for(int i = 0; i < m_DIM; i++)
-    {
+    //Â∞ÜÂØπËßíÁ∫øÂÖÉÁ¥†ÁöÑËß£ÈÄê‰∏™Â≠òÂÖ•Ëß£ÂêëÈáè
+    for (int i = 0; i < m_DIM; i++)
         xValue[i] = m_matrixA[i * m_DIM + i];
-    }
 
     return true;
 }
@@ -123,30 +109,28 @@ bool GuassEquation::Resolve(std::vector<double>& xValue)
 #ifdef _DEBUG
 void GuassEquation::DebugDump()
 {
-    for(int i = 0; i < m_DIM; i++)
+    for (int i = 0; i < m_DIM; i++)
     {
-        for(int j = 0; j < m_DIM; j++)
-        {
-            std::cout << m_matrixA[i * m_DIM + j] << " ";
-        }
-        std::cout << "| " << m_bVal[i] << std::endl;
+        for (int j = 0; j < m_DIM; j++)
+            cout << m_matrixA[i * m_DIM + j] << " ";
+        cout << "| " << m_bVal[i] << endl;
     }
 }
 #endif
 
-/*M «Œ¨∂»£¨column»°÷µ∑∂Œß¥”0µΩM-1*/
+//MÊòØÁª¥Â∫¶ÔºåcolumnÂèñÂÄºËåÉÂõ¥‰ªé0Âà∞M-1
 int GuassEquation::SelectPivotalElement(int column)
 {
     assert(column < m_DIM);
-    
-    int row = column;
-    double maxU = std::fabs(m_matrixA[column * m_DIM + column]);
 
-    for(int i = column + 1; i < m_DIM; i++)
+    int row = column;
+    double maxU = fabs(m_matrixA[column * m_DIM + column]);
+
+    for (int i = column + 1; i < m_DIM; i++)
     {
-        if(std::fabs(m_matrixA[i * m_DIM + column]) > maxU)
+        if (fabs(m_matrixA[i * m_DIM + column]) > maxU)
         {
-            maxU = std::fabs(m_matrixA[i * m_DIM + column]);
+            maxU = fabs(m_matrixA[i * m_DIM + column]);
             row = i;
         }
     }
@@ -156,10 +140,10 @@ int GuassEquation::SelectPivotalElement(int column)
 
 void GuassEquation::SwapRow(int row1, int row2)
 {
-    assert((row1 < m_DIM) && (row2 < m_DIM));
-    
+    assert(row1 < m_DIM && row2 < m_DIM);
+
     double temp;
-    for(int i = 0; i < m_DIM; i++)
+    for (int i = 0; i < m_DIM; i++)
     {
         temp = m_matrixA[row1 * m_DIM + i];
         m_matrixA[row1 * m_DIM + i] = m_matrixA[row2 * m_DIM + i];
@@ -172,27 +156,24 @@ void GuassEquation::SwapRow(int row1, int row2)
 
 void GuassEquation::SimplePivotalRow(int row, int startColumn)
 {
-    assert((row < m_DIM) && (startColumn < m_DIM));
+    assert(row < m_DIM && startColumn < m_DIM);
 
     double simple = m_matrixA[row * m_DIM + startColumn];
 
-    for(int i = startColumn; i < m_DIM; i++)
-    {
+    for (int i = startColumn; i < m_DIM; i++)
         m_matrixA[row * m_DIM + i] /= simple;
-    }
+    
     m_bVal[row] /= simple;
 }
 
 void GuassEquation::RowElimination(int rowS, int rowE, int startColumn)
 {
-    assert((rowS < m_DIM) && (rowE < m_DIM) && (startColumn < m_DIM));
+    assert(rowS < m_DIM && rowE < m_DIM && startColumn < m_DIM);
 
     double simple = m_matrixA[rowE * m_DIM + startColumn];
 
-    for(int i = startColumn; i < m_DIM; i++)
-    {
+    for (int i = startColumn; i < m_DIM; i++)
         m_matrixA[rowE * m_DIM + i] -= m_matrixA[rowS * m_DIM + i] * simple;
-    }
     m_bVal[rowE] -= m_bVal[rowS] * simple;
 }
 
@@ -202,7 +183,7 @@ void GuassEquation::RowElimination(int rowS, int rowE, int startColumn)
 //    double matrixA[3][3] = { {1, 2, 3}, {0, 1, 2}, {2, 4, 1} };
 //    double b[3] = {14, 8, 13 };
 
-    CDoubleArray R(3);
+    vector<double> R(3);
     GuassEquation equation(3, (double *)matrixA, b);
 
     equation.Resolve(R);

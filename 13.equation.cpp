@@ -6,7 +6,7 @@ typedef double (*FunctionPtr)(double);
 
 double binFunc(double x)
 {
-    return (2.0 * x * x + 3.2 * x - 1.8);
+    return 2.0 * x * x + 3.2 * x - 1.8;
 }
 
 double DichotomyEquation(double a, double b, FunctionPtr f)
