@@ -4,13 +4,69 @@
 #include <vector>
 #include <list>
 #include <algorithm>
+#include <random>
+#include <ctime>
 using namespace std;
 
 #undef UNICODE
 
 #include "graphics.h"
 #include "FreeImage.h"
-#include "CSnow.h"
+
+class CSnow
+{
+	friend CSnow MakeSnow(int maxWidth);
+
+protected:
+	POINT m_pos;
+	int m_speed;
+	int m_layers;
+
+protected:
+	CSnow(int x, int y, int speed, int layers)
+	{
+		m_pos = {x, y};
+		m_speed = speed;
+		m_layers = layers;
+	}
+
+public:
+	CSnow(const CSnow &snow)
+	{
+		m_pos = snow.m_pos;
+		m_speed = snow.m_speed;
+		m_layers = snow.m_layers;
+	}
+
+	POINT &GetPosition() { return m_pos; }
+	const POINT &GetPosition() const { return m_pos; }
+	int GetSpeed() const { return m_speed; }
+	int GetLayers() const { return m_layers; }
+	int DecreaseLayers() { return --m_layers; }
+
+	void UpdatePosition(int dps = 0)
+	{
+		if (dps == 0)
+			m_pos.y += m_speed;
+		else
+			m_pos.y += dps;
+	}
+};
+
+CSnow MakeSnow(int maxWidth)
+{
+	static default_random_engine e(time(nullptr));
+
+	uniform_int_distribution<unsigned int> ypos(0, maxWidth - 1);
+	uniform_int_distribution<unsigned int> rspeed(1, 5);
+	uniform_int_distribution<unsigned int> rlayers(1, 30);
+
+	int x = ypos(e);
+	int speed = rspeed(e);
+	int layers = rlayers(e);
+
+	return CSnow(x, 0, speed, layers);
+}
 
 class EasyXEnv
 {
@@ -274,3 +330,5 @@ int main()
 	FreeImage_Unload(lcImg);
 	return 0;
 }
+
+// set name=01.snow&&g++ %name%.cpp libeasyx.a -o %name%.exe -I. -L. -lFreeImage&&%name%.exe

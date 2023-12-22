@@ -1,3 +1,6 @@
+#include <iostream>
+#include <stack>
+
 const int UNIT_COUNT = 4;
 
 typedef struct tagPartner
@@ -34,6 +37,7 @@ int FindFreePartner(PARTNER *partners, int n)
 
     return -1;
 }
+
 // 这里也是算法一致性处理的一个技巧
 int GetPerfectPosition(PARTNER *partner, int id)
 {

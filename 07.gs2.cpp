@@ -1,3 +1,6 @@
+#include <iostream>
+#include <stack>
+
 const int UNIT_COUNT = 3;
 
 typedef struct tagPartner

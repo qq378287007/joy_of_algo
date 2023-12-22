@@ -1,36 +1,35 @@
-// graph.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
+#include <vector>
+#include <string>
+#include <queue>
+#include <iostream>
 
 const int MAX_VERTEXNODE = 20;
 
 typedef struct tagEdgeNode
 {
-    int vertexIndex;    //»î¶¯±ßÖÕµã¶¥µãË÷Òı
-    std::string name;   //»î¶¯±ßµÄÃû³Æ
-    int duty;           //»î¶¯±ßµÄÊ±¼ä£¨È¨ÖØ£©
-}EDGE_NODE;
+    int vertexIndex;  // æ´»åŠ¨è¾¹ç»ˆç‚¹é¡¶ç‚¹ç´¢å¼•
+    std::string name; // æ´»åŠ¨è¾¹çš„åç§°
+    int duty;         // æ´»åŠ¨è¾¹çš„æ—¶é—´ï¼ˆæƒé‡ï¼‰
+} EDGE_NODE;
 
 typedef struct tagVertexNode
 {
-    int sTime;    //ÊÂ¼ş×îÔç¿ªÊ¼Ê±¼ä
-    int eTime;    //ÊÂ¼ş×îÍí¿ªÊ¼Ê±¼ä
-    int inCount;  //»î¶¯µÄÇ°Çı½Úµã¸öÊı
-    std::vector<EDGE_NODE> edges; //ÏàÁÚ±ß±í
-}VERTEX_NODE;
+    int sTime;                    // äº‹ä»¶æœ€æ—©å¼€å§‹æ—¶é—´
+    int eTime;                    // äº‹ä»¶æœ€æ™šå¼€å§‹æ—¶é—´
+    int inCount;                  // æ´»åŠ¨çš„å‰é©±èŠ‚ç‚¹ä¸ªæ•°
+    std::vector<EDGE_NODE> edges; // ç›¸é‚»è¾¹è¡¨
+} VERTEX_NODE;
 
 typedef struct tagGraph
 {
-    int count; //Í¼µÄ¶¥µãµÄ¸öÊı
-    VERTEX_NODE vertexs[MAX_VERTEXNODE]; //Í¼µÄ¶¥µãÁĞ±í
-}GRAPH;
-
+    int count;                           // å›¾çš„é¡¶ç‚¹çš„ä¸ªæ•°
+    VERTEX_NODE vertexs[MAX_VERTEXNODE]; // å›¾çš„é¡¶ç‚¹åˆ—è¡¨
+} GRAPH;
 
 void InitGraph(GRAPH *g, int vertex)
 {
     g->count = vertex;
-    for(int i = 0; i < vertex; i++)
+    for (int i = 0; i < vertex; i++)
     {
         g->vertexs[i].sTime = 0;
         g->vertexs[i].eTime = 0x7FFFFFFF;
@@ -38,9 +37,9 @@ void InitGraph(GRAPH *g, int vertex)
     }
 }
 
-bool AddGraphEdge(GRAPH *g, const char*name, int u, int v, int weight)
+bool AddGraphEdge(GRAPH *g, const char *name, int u, int v, int weight)
 {
-    if((u >= g->count) || (v >= g->count))
+    if ((u >= g->count) || (v >= g->count))
     {
         return false;
     }
@@ -52,28 +51,28 @@ bool AddGraphEdge(GRAPH *g, const char*name, int u, int v, int weight)
     return true;
 }
 
-bool TopologicalSorting(GRAPH *g, std::vector<int>& sortedNode)
+bool TopologicalSorting(GRAPH *g, std::vector<int> &sortedNode)
 {
     std::priority_queue<int> nodeQueue;
 
-    for(int i = 0; i < g->count; i++)
+    for (int i = 0; i < g->count; i++)
     {
-        if(g->vertexs[i].inCount == 0)
+        if (g->vertexs[i].inCount == 0)
         {
             nodeQueue.push(i);
         }
     }
 
-    while(nodeQueue.size() != 0)
+    while (nodeQueue.size() != 0)
     {
         int u = nodeQueue.top();
         nodeQueue.pop();
         sortedNode.push_back(u);
-        for(int j = 0; j < (int)g->vertexs[u].edges.size(); j++)
+        for (int j = 0; j < (int)g->vertexs[u].edges.size(); j++)
         {
             int v = g->vertexs[u].edges[j].vertexIndex;
             g->vertexs[v].inCount--;
-            if(g->vertexs[v].inCount == 0)
+            if (g->vertexs[v].inCount == 0)
             {
                 nodeQueue.push(v);
             }
@@ -83,21 +82,21 @@ bool TopologicalSorting(GRAPH *g, std::vector<int>& sortedNode)
     return (sortedNode.size() == g->count);
 }
 
-void CalcESTime(GRAPH *g, const std::vector<int>& sortedNode)
+void CalcESTime(GRAPH *g, const std::vector<int> &sortedNode)
 {
-    g->vertexs[0].sTime = 0; //est[0] = 0
+    g->vertexs[0].sTime = 0; // est[0] = 0
 
     std::vector<int>::const_iterator nit = sortedNode.begin();
-    for(; nit != sortedNode.end(); ++nit)
+    for (; nit != sortedNode.end(); ++nit)
     {
         int u = *nit;
-        //±éÀúu³ö·¢µÄËùÓĞÓĞÏò±ß
+        // éå†uå‡ºå‘çš„æ‰€æœ‰æœ‰å‘è¾¹
         std::vector<EDGE_NODE>::iterator eit = g->vertexs[u].edges.begin();
-        for(; eit != g->vertexs[u].edges.end(); ++eit)
+        for (; eit != g->vertexs[u].edges.end(); ++eit)
         {
             int v = eit->vertexIndex;
             int uvst = g->vertexs[u].sTime + eit->duty;
-            if(uvst > g->vertexs[v].sTime)
+            if (uvst > g->vertexs[v].sTime)
             {
                 g->vertexs[v].sTime = uvst;
             }
@@ -105,22 +104,22 @@ void CalcESTime(GRAPH *g, const std::vector<int>& sortedNode)
     }
 }
 
-void CalcLSTime(GRAPH *g, const std::vector<int>& sortedNode)
+void CalcLSTime(GRAPH *g, const std::vector<int> &sortedNode)
 {
-    //×îºóÒ»¸ö½ÚµãµÄ×îÍí¿ªÊ¼Ê±¼äµÈÓÚ×îÔç¿ªÊ¼Ê±¼ä
+    // æœ€åä¸€ä¸ªèŠ‚ç‚¹çš„æœ€æ™šå¼€å§‹æ—¶é—´ç­‰äºæœ€æ—©å¼€å§‹æ—¶é—´
     g->vertexs[g->count - 1].eTime = g->vertexs[g->count - 1].sTime;
 
     std::vector<int>::const_reverse_iterator cit = sortedNode.rbegin();
-    for(; cit != sortedNode.rend(); ++cit)
+    for (; cit != sortedNode.rend(); ++cit)
     {
         int u = *cit;
-        //±éÀúu³ö·¢µÄËùÓĞÓĞÏò±ß
+        // éå†uå‡ºå‘çš„æ‰€æœ‰æœ‰å‘è¾¹
         std::vector<EDGE_NODE>::iterator eit = g->vertexs[u].edges.begin();
-        for(; eit != g->vertexs[u].edges.end(); ++eit)
+        for (; eit != g->vertexs[u].edges.end(); ++eit)
         {
             int v = eit->vertexIndex;
             int uvet = g->vertexs[v].eTime - eit->duty;
-            if(uvet < g->vertexs[u].eTime)
+            if (uvet < g->vertexs[u].eTime)
             {
                 g->vertexs[u].eTime = uvet;
             }
@@ -128,10 +127,10 @@ void CalcLSTime(GRAPH *g, const std::vector<int>& sortedNode)
     }
 }
 
-void PrintSorting(GRAPH *g, const std::vector<int>& sortedNode)
+void PrintSorting(GRAPH *g, const std::vector<int> &sortedNode)
 {
     std::vector<int>::const_iterator cit = sortedNode.begin();
-    for(;cit != sortedNode.end(); ++cit)
+    for (; cit != sortedNode.end(); ++cit)
     {
         std::cout << "e" << *cit << std::endl;
     }
@@ -140,29 +139,29 @@ void PrintSorting(GRAPH *g, const std::vector<int>& sortedNode)
 bool CriticalPath(GRAPH *g)
 {
     std::vector<int> sortedNode;
-    if(!TopologicalSorting(g, sortedNode)) //²½Öè1
+    if (!TopologicalSorting(g, sortedNode)) // æ­¥éª¤1
     {
         return false;
     }
-    CalcESTime(g, sortedNode); //²½Öè2
-    CalcLSTime(g, sortedNode); //²½Öè4
+    CalcESTime(g, sortedNode); // æ­¥éª¤2
+    CalcLSTime(g, sortedNode); // æ­¥éª¤4
 
-    //²½Öè4£ºÊä³ö¹Ø¼üÂ·¾¶ÉÏµÄ»î¶¯Ãû³Æ
-    //for(int u = 0; u < g->count; u++)
+    // æ­¥éª¤4ï¼šè¾“å‡ºå…³é”®è·¯å¾„ä¸Šçš„æ´»åŠ¨åç§°
+    // for(int u = 0; u < g->count; u++)
     //{
 
     std::vector<int>::iterator nit = sortedNode.begin();
-    for(; nit != sortedNode.end(); ++nit)
+    for (; nit != sortedNode.end(); ++nit)
     {
         int u = *nit;
         std::vector<EDGE_NODE>::iterator eit = g->vertexs[u].edges.begin();
-        for(; eit != g->vertexs[u].edges.end(); ++eit)
+        for (; eit != g->vertexs[u].edges.end(); ++eit)
         {
             int v = eit->vertexIndex;
-            //ÊÇ·ñÊÇ¹Ø¼ü»î¶¯£¿
-            if(g->vertexs[u].sTime == g->vertexs[v].eTime - eit->duty)
+            // æ˜¯å¦æ˜¯å…³é”®æ´»åŠ¨ï¼Ÿ
+            if (g->vertexs[u].sTime == g->vertexs[v].eTime - eit->duty)
             {
-                if(!eit->name.empty())//¹ıÂËÁ¬½ÓÊÂ¼ş¶¥µãµÄĞéÄâ»î¶¯±ß
+                if (!eit->name.empty()) // è¿‡æ»¤è¿æ¥äº‹ä»¶é¡¶ç‚¹çš„è™šæ‹Ÿæ´»åŠ¨è¾¹
                 {
                     std::cout << eit->name << std::endl;
                 }
@@ -173,9 +172,8 @@ bool CriticalPath(GRAPH *g)
     return true;
 }
 
-int main(int argc, char* argv[])
+int main()
 {
-
     GRAPH graph;
     InitGraph(&graph, 10);
     AddGraphEdge(&graph, "P1", 0, 1, 8);
@@ -193,6 +191,5 @@ int main(int argc, char* argv[])
     AddGraphEdge(&graph, "P6", 5, 9, 7);
 
     CriticalPath(&graph);
-	return 0;
+    return 0;
 }
-

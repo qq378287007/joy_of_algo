@@ -34,36 +34,35 @@ const int CIGARET_PRINCE = 2;
 const int CIGARET_PALLMALL = 3;
 const int CIGARET_BLUEMASTER = 4;
 
-typedef enum tagItemType
+enum ITEM_TYPE
 {
     type_house = 0,
     type_nation = 1,
     type_drink = 2,
     type_pet = 3,
     type_cigaret = 4
-} ITEM_TYPE;
+};
 
 const char *itemName[GROUPS_ITEMS] = {"房子", "国家", "饮料", "宠物", "烟"};
-const char *valueName[GROUPS_ITEMS][GROUPS_COUNT] = {
-    {"蓝色", "红色", "绿色", "黄色", "白色"},
-    {"挪威", "丹麦", "瑞士", "英国", "德国"},
-    {"茶", "水", "咖啡", "啤酒", "牛奶"},
-    {"马", "猫", "鸟", "鱼", "狗"},
-    {"Blends", "Dunhill", "Prince", "PallMall", "BlueMaster"}};
+const char *valueName[GROUPS_ITEMS][GROUPS_COUNT] = {{"蓝色", "红色", "绿色", "黄色", "白色"},
+                                                     {"挪威", "丹麦", "瑞士", "英国", "德国"},
+                                                     {"茶", "水", "咖啡", "啤酒", "牛奶"},
+                                                     {"马", "猫", "鸟", "鱼", "狗"},
+                                                     {"Blends", "Dunhill", "Prince", "PallMall", "BlueMaster"}};
 
-typedef struct tagItem
+struct ITEM
 {
     ITEM_TYPE type;
     int value;
-} ITEM;
+};
 
-typedef struct tagBind
+struct BIND
 {
     ITEM_TYPE first_type;
     int first_val;
     ITEM_TYPE second_type;
     int second_val;
-} BIND;
+};
 
 const BIND binds[] = {
     {type_house, COLOR_RED, type_nation, NATION_ENGLAND},
@@ -77,13 +76,13 @@ const BIND binds[] = {
 
 const int BINDS_COUNT = sizeof(binds) / sizeof(binds[0]);
 
-typedef struct tagRelation
+struct RELATION
 {
     ITEM_TYPE type;
     int val;
     ITEM_TYPE relation_type;
     int relation_val;
-} RELATION;
+};
 
 const RELATION relations[] = {
     {type_cigaret, CIGARET_BLENDS, type_pet, PET_CAT},
@@ -93,15 +92,15 @@ const RELATION relations[] = {
 
 const int RELATIONS_COUNT = sizeof(relations) / sizeof(relations[0]);
 /*
-typedef struct tagGroup
+ struct GROUP
 {
     ITEM items[GROUPS_ITEMS];
-}GROUP;
+};
 */
-typedef struct tagGroup
+struct GROUP
 {
     int itemValue[GROUPS_ITEMS];
-} GROUP;
+};
 
 int GetGroupItemValue(GROUP *group, ITEM_TYPE type)
 {
@@ -214,7 +213,7 @@ void DoGroupsfinalCheck(GROUP *groups)
 
 void EnumPeopleCigerts(GROUP *groups, int groupIdx)
 {
-    if (groupIdx == GROUPS_COUNT) /*递归终止条件*/
+    if (groupIdx == GROUPS_COUNT) // 递归终止条件
     {
         DoGroupsfinalCheck(groups);
         return;
@@ -238,7 +237,7 @@ void ArrangePeopleCigert(GROUP *groups)
 
 void EnumPeoplePats(GROUP *groups, int groupIdx)
 {
-    if (groupIdx == GROUPS_COUNT) /*递归终止条件*/
+    if (groupIdx == GROUPS_COUNT) // 递归终止条件
     {
         ArrangePeopleCigert(groups);
         return;
@@ -257,15 +256,15 @@ void EnumPeoplePats(GROUP *groups, int groupIdx)
 
 void ArrangePeoplePet(GROUP *groups)
 {
-    /*这里没有可用规则*/
+    // 这里没有可用规则
     EnumPeoplePats(groups, 0);
 }
 
 void EnumPeopleDrinks(GROUP *groups, int groupIdx)
 {
-    if (groupIdx == GROUPS_COUNT) /*递归终止条件*/
+    if (groupIdx == GROUPS_COUNT) // 递归终止条件
     {
-        /*应用规则(8)：住在中间那个房子里的人喝牛奶；*/
+        // 应用规则(8)：住在中间那个房子里的人喝牛奶；
         if (groups[2].itemValue[type_drink] == DRINK_MILK)
             ArrangePeoplePet(groups);
         return;
@@ -283,14 +282,14 @@ void EnumPeopleDrinks(GROUP *groups, int groupIdx)
 
 void ArrangePeopleDrinks(GROUP *groups)
 {
-    /*这里没有可用规则*/
+    // 这里没有可用规则
     EnumPeopleDrinks(groups, 0);
 }
 
-/*遍历国家*/
+// 遍历国家
 void EnumHouseNations(GROUP *groups, int groupIdx)
 {
-    if (groupIdx == GROUPS_COUNT) /*递归终止条件*/
+    if (groupIdx == GROUPS_COUNT) // 递归终止条件
     {
         ArrangePeopleDrinks(groups);
         return;
@@ -309,15 +308,15 @@ void EnumHouseNations(GROUP *groups, int groupIdx)
 
 void ArrangeHouseNations(GROUP *groups)
 {
-    /*应用规则(9)：挪威人住在第一个房子里面；*/
+    // 应用规则(9)：挪威人住在第一个房子里面；
     groups[0].itemValue[type_nation] = NATION_NORWAY;
-    EnumHouseNations(groups, 1); /*从第二个房子开始*/
+    EnumHouseNations(groups, 1); // 从第二个房子开始
 }
 
-/* 遍历房子颜色*/
+// 遍历房子颜色
 void EnumHouseColors(GROUP *groups, int groupIdx)
 {
-    if (groupIdx == GROUPS_COUNT) /*递归终止条件*/
+    if (groupIdx == GROUPS_COUNT) // 递归终止条件
     {
         ArrangeHouseNations(groups);
         return;
@@ -349,31 +348,28 @@ int main(int argc, char *argv[])
 
 void test_Checkfunctions()
 {
-    GROUP groups[GROUPS_COUNT] = {
-        {COLOR_YELLOW, NATION_NORWAY, DRINK_WATER, PET_CAT, CIGARET_DUNHILL},
-        {COLOR_BLUE, NATION_DANMARK, DRINK_TEA, PET_HORSE, CIGARET_BLENDS},
-        {COLOR_RED, NATION_ENGLAND, DRINK_MILK, PET_BIRD, CIGARET_PALLMALL},
-        {COLOR_GREEN, NATION_GERMANY, DRINK_COFFEE, PET_FISH, CIGARET_PRINCE},
-        {COLOR_WHITE, NATION_SWEDEND, DRINK_BEER, PET_DOG, CIGARET_BLUEMASTER}};
+    GROUP groups[GROUPS_COUNT] = {{COLOR_YELLOW, NATION_NORWAY, DRINK_WATER, PET_CAT, CIGARET_DUNHILL},
+                                  {COLOR_BLUE, NATION_DANMARK, DRINK_TEA, PET_HORSE, CIGARET_BLENDS},
+                                  {COLOR_RED, NATION_ENGLAND, DRINK_MILK, PET_BIRD, CIGARET_PALLMALL},
+                                  {COLOR_GREEN, NATION_GERMANY, DRINK_COFFEE, PET_FISH, CIGARET_PRINCE},
+                                  {COLOR_WHITE, NATION_SWEDEND, DRINK_BEER, PET_DOG, CIGARET_BLUEMASTER}};
     assert(CheckAllGroupsBind(groups, binds));
     assert(CheckAllGroupsRelation(groups, relations));
 
-    GROUP groups2[GROUPS_COUNT] = {
-        {COLOR_YELLOW, NATION_DANMARK, DRINK_WATER, PET_CAT, CIGARET_DUNHILL},
-        {COLOR_BLUE, NATION_NORWAY, DRINK_TEA, PET_HORSE, CIGARET_BLENDS},
-        {COLOR_RED, NATION_ENGLAND, DRINK_MILK, PET_BIRD, CIGARET_PALLMALL},
-        {COLOR_GREEN, NATION_GERMANY, DRINK_COFFEE, PET_FISH, CIGARET_PRINCE},
-        {COLOR_WHITE, NATION_SWEDEND, DRINK_BEER, PET_DOG, CIGARET_BLUEMASTER}};
+    GROUP groups2[GROUPS_COUNT] = {{COLOR_YELLOW, NATION_DANMARK, DRINK_WATER, PET_CAT, CIGARET_DUNHILL},
+                                   {COLOR_BLUE, NATION_NORWAY, DRINK_TEA, PET_HORSE, CIGARET_BLENDS},
+                                   {COLOR_RED, NATION_ENGLAND, DRINK_MILK, PET_BIRD, CIGARET_PALLMALL},
+                                   {COLOR_GREEN, NATION_GERMANY, DRINK_COFFEE, PET_FISH, CIGARET_PRINCE},
+                                   {COLOR_WHITE, NATION_SWEDEND, DRINK_BEER, PET_DOG, CIGARET_BLUEMASTER}};
 
     assert(!CheckAllGroupsBind(groups2, binds));
     assert(!CheckAllGroupsRelation(groups2, relations));
 
-    GROUP groups3[GROUPS_COUNT] = {
-        {COLOR_YELLOW, NATION_NORWAY, DRINK_WATER, PET_CAT, CIGARET_DUNHILL},
-        {COLOR_BLUE, NATION_DANMARK, DRINK_TEA, PET_BIRD, CIGARET_BLENDS},
-        {COLOR_RED, NATION_ENGLAND, DRINK_MILK, PET_HORSE, CIGARET_PALLMALL},
-        {COLOR_GREEN, NATION_GERMANY, DRINK_COFFEE, PET_FISH, CIGARET_PRINCE},
-        {COLOR_WHITE, NATION_SWEDEND, DRINK_BEER, PET_DOG, CIGARET_BLUEMASTER}};
+    GROUP groups3[GROUPS_COUNT] = {{COLOR_YELLOW, NATION_NORWAY, DRINK_WATER, PET_CAT, CIGARET_DUNHILL},
+                                   {COLOR_BLUE, NATION_DANMARK, DRINK_TEA, PET_BIRD, CIGARET_BLENDS},
+                                   {COLOR_RED, NATION_ENGLAND, DRINK_MILK, PET_HORSE, CIGARET_PALLMALL},
+                                   {COLOR_GREEN, NATION_GERMANY, DRINK_COFFEE, PET_FISH, CIGARET_PRINCE},
+                                   {COLOR_WHITE, NATION_SWEDEND, DRINK_BEER, PET_DOG, CIGARET_BLUEMASTER}};
 
     assert(!CheckAllGroupsBind(groups3, binds));
     assert(!CheckAllGroupsRelation(groups3, relations));
