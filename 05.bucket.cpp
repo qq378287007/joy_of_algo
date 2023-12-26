@@ -5,6 +5,11 @@
 #include <cassert>
 using namespace std;
 
+const int BUCKETS_COUNT = 3;
+const int bucket_capicity[BUCKETS_COUNT] = {8, 5, 3};
+const int bucket_init_state[BUCKETS_COUNT] = {8, 0, 0};
+const int bucket_final_state[BUCKETS_COUNT] = {4, 4, 0};
+
 struct ACTION
 {
     int from;
@@ -12,62 +17,10 @@ struct ACTION
     int water;
 };
 
-const int BUCKETS_COUNT = 3;
-int bucket_capicity[BUCKETS_COUNT] = {8, 5, 3};
-int bucket_init_state[BUCKETS_COUNT] = {8, 0, 0};
-int bucket_final_state[BUCKETS_COUNT] = {4, 4, 0};
 struct BucketState
 {
-    ACTION curAction;
+    ACTION curAction{-1, 0, 8};
     int bucket_s[BUCKETS_COUNT];
-
-    BucketState()
-    {
-        SetBuckets(bucket_init_state);
-        SetAction(8, -1, 0);
-    }
-
-    BucketState(const int *buckets)
-    {
-        SetBuckets(buckets);
-        SetAction(8, -1, 0);
-    }
-
-    BucketState(const BucketState &state)
-    {
-        SetBuckets((const int *)state.bucket_s);
-        SetAction(state.curAction.water, state.curAction.from, state.curAction.to);
-    }
-
-    BucketState &operator=(const BucketState &state)
-    {
-        SetBuckets((const int *)state.bucket_s);
-        SetAction(state.curAction.water, state.curAction.from, state.curAction.to);
-        return *this;
-    }
-
-    bool IsSameState(const BucketState &state) const
-    {
-        for (int i = 0; i < BUCKETS_COUNT; ++i)
-            if (bucket_s[i] != state.bucket_s[i])
-                return false;
-        return true;
-    }
-
-    bool operator==(const BucketState &state) const
-    {
-        for (int i = 0; i < BUCKETS_COUNT; ++i)
-            if (bucket_s[i] != state.bucket_s[i])
-                return false;
-        return true;
-    }
-
-    void SetAction(int w, int f, int t)
-    {
-        curAction.water = w;
-        curAction.from = f;
-        curAction.to = t;
-    }
 
     void SetBuckets(const int *buckets)
     {
@@ -75,15 +28,24 @@ struct BucketState
             bucket_s[i] = buckets[i];
     }
 
-    bool CanTakeDumpAction(int from, int to) const
+    BucketState(const int *buckets = bucket_init_state)
     {
-        assert(from >= 0 && from < BUCKETS_COUNT);
-        assert(to >= 0 && to < BUCKETS_COUNT);
-
-        // 不是同一个桶，且from桶中有水，且to桶中不满
-        return from != to && !IsBucketEmpty(from) && !IsBucketFull(to);
+        SetBuckets(buckets);
     }
+    /*
+        BucketState(const BucketState &state)
+        {
+            SetBuckets((const int *)state.bucket_s);
+            curAction = state.curAction;
+        }
 
+        BucketState &operator=(const BucketState &state)
+        {
+            SetBuckets((const int *)state.bucket_s);
+            curAction = state.curAction;
+            return *this;
+        }
+    */
     bool IsBucketEmpty(int bucket) const
     {
         assert(bucket >= 0 && bucket < BUCKETS_COUNT);
@@ -96,40 +58,53 @@ struct BucketState
         return bucket_s[bucket] >= bucket_capicity[bucket];
     }
 
+    /*
+        bool operator==(const BucketState &state) const
+        {
+            for (int i = 0; i < BUCKETS_COUNT; ++i)
+                if (bucket_s[i] != state.bucket_s[i])
+                    return false;
+            return true;
+        }
+    */
+    bool IsSameState(const BucketState &state) const
+    {
+        for (int i = 0; i < BUCKETS_COUNT; ++i)
+            if (bucket_s[i] != state.bucket_s[i])
+                return false;
+        return true;
+    }
+
     bool IsFinalState() const
     {
         return IsSameState(BucketState(bucket_final_state));
     }
 
-    // 从from到to倒水，返回实际倒水体积
-    bool DumpWater(int from, int to, BucketState &next) const
+    bool CanTakeDumpAction(int from, int to) const
     {
-        next.SetBuckets(bucket_s);
-        int dump_water = bucket_capicity[to] - next.bucket_s[to];
-        if (next.bucket_s[from] >= dump_water)
-        {
-            next.bucket_s[to] += dump_water;
-            next.bucket_s[from] -= dump_water;
-        }
-        else
-        {
-            next.bucket_s[to] += next.bucket_s[from];
-            dump_water = next.bucket_s[from];
-            next.bucket_s[from] = 0;
-        }
-        if (dump_water > 0) // 是一个有效的倒水动作?
-        {
-            next.SetAction(dump_water, from, to);
-            return true;
-        }
+        assert(from >= 0 && from < BUCKETS_COUNT);
+        assert(to >= 0 && to < BUCKETS_COUNT);
 
-        return false;
+        // 不是同一个桶，且from桶中有水，且to桶中不满
+        return from != to && !IsBucketEmpty(from) && !IsBucketFull(to);
+    }
+
+    // 从from到to倒水，返回倒水后状态
+    BucketState DumpWater(int from, int to) const // CanTakeDumpAction判断后调用，肯定能倒水
+    {
+        BucketState next = *this;
+
+        int dump_water = min(next.bucket_s[from], bucket_capicity[to] - next.bucket_s[to]);
+        next.bucket_s[from] -= dump_water;
+        next.bucket_s[to] += dump_water;
+        next.curAction = {from, to, dump_water};
+
+        return next;
     }
 
     void PrintStates() const
     {
-        cout << "Dump " << curAction.water << " water from "
-             << curAction.from + 1 << " to " << curAction.to + 1 << ", ";
+        cout << "Dump " << curAction.water << " water from " << curAction.from + 1 << " to " << curAction.to + 1 << ", ";
         cout << "buckets water states is : ";
 
         for (int i = 0; i < BUCKETS_COUNT; ++i)
@@ -152,19 +127,16 @@ void PrintResult(deque<BucketState> &states)
 {
     cout << "Find Result : " << endl;
     for_each(states.cbegin(), states.cend(), mem_fn(&BucketState::PrintStates));
-    cout << endl
-         << endl;
+    cout << endl;
 }
 
 void SearchState(deque<BucketState> &states);
-
 void SearchStateOnAction(deque<BucketState> &states, const BucketState &current, int from, int to)
 {
-    if (current.CanTakeDumpAction(from, to))
+    if (current.CanTakeDumpAction(from, to)) // 判断是否能倒水
     {
-        BucketState next;
-        bool bDump = current.DumpWater(from, to, next); // 从from到to倒水，如果成功，返回倒水后的状态
-        if (bDump && !IsProcessedState(states, next))
+        BucketState next = current.DumpWater(from, to); // 从from到to倒水，返回倒水后的状态
+        if (!IsProcessedState(states, next))            // 判断状态是否已存在
         {
             states.push_back(next);
             SearchState(states);
@@ -175,7 +147,7 @@ void SearchStateOnAction(deque<BucketState> &states, const BucketState &current,
 
 void SearchState(deque<BucketState> &states)
 {
-    BucketState current = states.back(); // 每次都从当前状态开始
+    const BucketState &current = states.back(); // 每次都从当前状态开始
     if (current.IsFinalState())
     {
         PrintResult(states);

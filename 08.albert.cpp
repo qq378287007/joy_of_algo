@@ -44,11 +44,12 @@ enum ITEM_TYPE
 };
 
 const char *itemName[GROUPS_ITEMS] = {"房子", "国家", "饮料", "宠物", "烟"};
-const char *valueName[GROUPS_ITEMS][GROUPS_COUNT] = {{"蓝色", "红色", "绿色", "黄色", "白色"},
-                                                     {"挪威", "丹麦", "瑞士", "英国", "德国"},
-                                                     {"茶", "水", "咖啡", "啤酒", "牛奶"},
-                                                     {"马", "猫", "鸟", "鱼", "狗"},
-                                                     {"Blends", "Dunhill", "Prince", "PallMall", "BlueMaster"}};
+const char *valueName[GROUPS_ITEMS][GROUPS_COUNT] = {
+    {"蓝色", "红色", "绿色", "黄色", "白色"},
+    {"挪威", "丹麦", "瑞士", "英国", "德国"},
+    {"茶", "水", "咖啡", "啤酒", "牛奶"},
+    {"马", "猫", "鸟", "鱼", "狗"},
+    {"Blends", "Dunhill", "Prince", "PallMall", "BlueMaster"}};
 
 struct ITEM
 {

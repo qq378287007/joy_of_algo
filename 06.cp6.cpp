@@ -39,16 +39,17 @@ struct ACTION_DESCRIPTION
     ACTION_NAME act;
     const char *description; // 相应动作的人类语言描述
 };
-const ACTION_DESCRIPTION actDesc[] = {{ONE_MONSTER_GO, "One monster go over river"},
-                                      {TWO_MONSTER_GO, "Two monster go over river"},
-                                      {ONE_MONK_GO, "One monk go over river"},
-                                      {TWO_MONK_GO, "Two monk go over river"},
-                                      {ONE_MONSTER_ONE_MONK_GO, "One monster and one monk go over river"},
-                                      {ONE_MONSTER_BACK, "One monster go back"},
-                                      {TWO_MONSTER_BACK, "Two monster go back"},
-                                      {ONE_MONK_BACK, "One monk go back"},
-                                      {TWO_MONK_BACK, "Two monk go back"},
-                                      {ONE_MONSTER_ONE_MONK_BACK, "One monster and one monk go back"}};
+const ACTION_DESCRIPTION actDesc[] = {
+    {ONE_MONSTER_GO, "One monster go over river"},
+    {TWO_MONSTER_GO, "Two monster go over river"},
+    {ONE_MONK_GO, "One monk go over river"},
+    {TWO_MONK_GO, "Two monk go over river"},
+    {ONE_MONSTER_ONE_MONK_GO, "One monster and one monk go over river"},
+    {ONE_MONSTER_BACK, "One monster go back"},
+    {TWO_MONSTER_BACK, "Two monster go back"},
+    {ONE_MONK_BACK, "One monk go back"},
+    {TWO_MONK_BACK, "Two monk go back"},
+    {ONE_MONSTER_ONE_MONK_BACK, "One monster and one monk go back"}};
 const char *GetActionDescription(ACTION_NAME act)
 {
     for (int i = 0; i < sizeof(actDesc) / sizeof(actDesc[0]); ++i)
@@ -62,41 +63,40 @@ const int monster_count = 3;
 const int monk_count = 3;
 struct ItemState
 {
-    int local_monster;
-    int local_monk;
-    int remote_monster;
-    int remote_monk;
-    BOAT_LOCATION boat; // LOCAL or REMOTE
-    ACTION_NAME curAct;
+    int local_monster{monster_count};
+    int local_monk{monk_count};
+    int remote_monster{0};
+    int remote_monk{0};
+    BOAT_LOCATION boat{LOCAL}; // LOCAL or REMOTE
+    ACTION_NAME curAct{INVALID_ACTION_NAME};
 
-    ItemState()
-    {
-        SetState(monster_count, monk_count, 0, 0, LOCAL);
-        curAct = INVALID_ACTION_NAME;
-    }
+    /*
+        ItemState()
+        {
+            SetState(monster_count, monk_count, 0, 0, LOCAL);
+            curAct = INVALID_ACTION_NAME;
+        }
+        ItemState(const ItemState &state)
+        {
+            SetState(state.local_monster, state.local_monk, state.remote_monster, state.remote_monk, state.boat);
+            curAct = state.curAct;
+        }
 
-    ItemState(const ItemState &state)
-    {
-        SetState(state.local_monster, state.local_monk, state.remote_monster, state.remote_monk, state.boat);
-        curAct = state.curAct;
-    }
-
-    ItemState &operator=(const ItemState &state)
-    {
-        SetState(state.local_monster, state.local_monk, state.remote_monster, state.remote_monk, state.boat);
-        curAct = state.curAct;
-        return *this;
-    }
-
-    void SetState(int lmonster, int lmonk, int rmonster, int rmonk, BOAT_LOCATION bl)
-    {
-        local_monster = lmonster;
-        local_monk = lmonk;
-        remote_monster = rmonster;
-        remote_monk = rmonk;
-        boat = bl;
-    }
-
+        ItemState &operator=(const ItemState &state)
+        {
+            SetState(state.local_monster, state.local_monk, state.remote_monster, state.remote_monk, state.boat);
+            curAct = state.curAct;
+            return *this;
+        }
+        void SetState(int lmonster, int lmonk, int rmonster, int rmonk, BOAT_LOCATION bl)
+        {
+            local_monster = lmonster;
+            local_monk = lmonk;
+            remote_monster = rmonster;
+            remote_monk = rmonk;
+            boat = bl;
+        }
+    */
     inline bool IsSameState(const ItemState &state) const
     {
         return (local_monster == state.local_monster &&
@@ -125,10 +125,12 @@ struct ItemState
         if (boat == ae.boat_to)
             return false;
 
-        if (local_monster + ae.move_monster < 0 || local_monster + ae.move_monster > monster_count)
+        int tmp_local_monster = local_monster + ae.move_monster;
+        if (tmp_local_monster < 0 || tmp_local_monster > monster_count)
             return false;
 
-        if (local_monk + ae.move_monk < 0 || local_monk + ae.move_monk > monk_count)
+        int tmp_local_monk = local_monk + ae.move_monk;
+        if (tmp_local_monk < 0 || tmp_local_monk > monk_count)
             return false;
 
         return true;
@@ -146,16 +148,17 @@ struct ItemState
     }
 };
 
-const ACTION_EFFECTION actEffect[] = {{ONE_MONSTER_GO, REMOTE, -1, 0},
-                                      {TWO_MONSTER_GO, REMOTE, -2, 0},
-                                      {ONE_MONK_GO, REMOTE, 0, -1},
-                                      {TWO_MONK_GO, REMOTE, 0, -2},
-                                      {ONE_MONSTER_ONE_MONK_GO, REMOTE, -1, -1},
-                                      {ONE_MONSTER_BACK, LOCAL, 1, 0},
-                                      {TWO_MONSTER_BACK, LOCAL, 2, 0},
-                                      {ONE_MONK_BACK, LOCAL, 0, 1},
-                                      {TWO_MONK_BACK, LOCAL, 0, 2},
-                                      {ONE_MONSTER_ONE_MONK_BACK, LOCAL, 1, 1}};
+const ACTION_EFFECTION actEffect[] = {
+    {ONE_MONSTER_GO, REMOTE, -1, 0},
+    {TWO_MONSTER_GO, REMOTE, -2, 0},
+    {ONE_MONK_GO, REMOTE, 0, -1},
+    {TWO_MONK_GO, REMOTE, 0, -2},
+    {ONE_MONSTER_ONE_MONK_GO, REMOTE, -1, -1},
+    {ONE_MONSTER_BACK, LOCAL, 1, 0},
+    {TWO_MONSTER_BACK, LOCAL, 2, 0},
+    {ONE_MONK_BACK, LOCAL, 0, 1},
+    {TWO_MONK_BACK, LOCAL, 0, 2},
+    {ONE_MONSTER_ONE_MONK_BACK, LOCAL, 1, 1}};
 
 inline bool IsSameItemState(const ItemState &state1, const ItemState &state2)
 {
@@ -171,33 +174,27 @@ void PrintResult(const deque<ItemState> &states)
 {
     cout << "Find Result : " << endl;
     for_each(states.cbegin(), states.cend(), mem_fn(&ItemState::PrintStates));
-    cout << endl
-         << endl;
+    cout << endl;
 }
 
-bool MakeActionNewState(const ItemState &curState, const ACTION_EFFECTION &ae, ItemState &newState)
+ItemState MakeActionNewState(const ItemState &curState, const ACTION_EFFECTION &ae)
 {
-    if (curState.CanTakeAction(ae))
-    {
-        newState = curState;
-        newState.local_monster += ae.move_monster;
-        newState.local_monk += ae.move_monk;
-        newState.remote_monster -= ae.move_monster;
-        newState.remote_monk -= ae.move_monk;
-        newState.boat = ae.boat_to;
-        newState.curAct = ae.act;
-        return true;
-    }
-    return false;
+    ItemState newState = curState;
+    newState.local_monster += ae.move_monster;
+    newState.local_monk += ae.move_monk;
+    newState.remote_monster -= ae.move_monster;
+    newState.remote_monk -= ae.move_monk;
+    newState.boat = ae.boat_to;
+    newState.curAct = ae.act;
+    return newState;
 }
 
 void SearchState(deque<ItemState> &states);
-
 void SearchStateOnNewAction(deque<ItemState> &states, const ItemState &current, const ACTION_EFFECTION &ae)
 {
-    ItemState next;
-    if (MakeActionNewState(current, ae, next))
+    if (current.CanTakeAction(ae))
     {
+        ItemState next = MakeActionNewState(current, ae);
         if (next.IsValidState() && !IsProcessedState(states, next))
         {
             states.push_back(next);
@@ -209,7 +206,7 @@ void SearchStateOnNewAction(deque<ItemState> &states, const ItemState &current, 
 
 void SearchState(deque<ItemState> &states)
 {
-    ItemState current = states.back(); // 每次都从当前状态开始
+    const ItemState &current = states.back(); // 每次都从当前状态开始
     if (current.IsFinalState())
     {
         PrintResult(states);
