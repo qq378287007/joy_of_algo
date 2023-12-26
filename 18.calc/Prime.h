@@ -4,25 +4,24 @@
 #include "BigInt.h"
 
 /*****************************************************************
-RSAÏà¹ØÔËËã
-Rab£¬À­±öÃ×ÀÕËã·¨½øĞĞËØÊı²âÊÔ
-Euc£¬Å·¼¸ÀïµÂËã·¨Çó½âÍ¬Óà·½³Ì
-RsaTrans£¬·´¸´Æ½·½Ëã·¨½øĞĞÃİÄ£ÔËËã
-GetPrime£¬²úÉúÖ¸¶¨³¤¶ÈµÄËæ»ú´óËØÊı
+RSAç›¸å…³è¿ç®—
+Rabï¼Œæ‹‰å®¾ç±³å‹’ç®—æ³•è¿›è¡Œç´ æ•°æµ‹è¯•
+Eucï¼Œæ¬§å‡ é‡Œå¾·ç®—æ³•æ±‚è§£åŒä½™æ–¹ç¨‹
+RsaTransï¼Œåå¤å¹³æ–¹ç®—æ³•è¿›è¡Œå¹‚æ¨¡è¿ç®—
+GetPrimeï¼Œäº§ç”ŸæŒ‡å®šé•¿åº¦çš„éšæœºå¤§ç´ æ•°
 *****************************************************************/
-int RabPrimeTest(const CBigInt& prime);
-//CBigInt Euc(CBigInt& A);
-CBigInt RsaTrans(const CBigInt& N, const CBigInt& A, const CBigInt& B);
+int RabPrimeTest(const CBigInt &prime);
+// CBigInt Euc(CBigInt& A);
+CBigInt RsaTrans(const CBigInt &N, const CBigInt &A, const CBigInt &B);
 CBigInt GetBigIntPrime(int bits);
 
-CBigInt ExtEuclid(const CBigInt& a, const CBigInt& b, CBigInt& x, CBigInt& y);
-CBigInt CongruenceEquation(const CBigInt& a, const CBigInt& n);
+CBigInt ExtEuclid(const CBigInt &a, const CBigInt &b, CBigInt &x, CBigInt &y);
+CBigInt CongruenceEquation(const CBigInt &a, const CBigInt &n);
 __int64 CongruenceEquation64(__int64 a, __int64 n);
-CBigInt ModularPower(const CBigInt& M, const CBigInt& E, const CBigInt& N);
-CBigInt MontgomeryModularPower(const CBigInt& M, const CBigInt& E, const CBigInt& N);
-bool MillerRabin(const CBigInt& n);
-bool IsPrimeNumber(const CBigInt& n);
+CBigInt ModularPower(const CBigInt &M, const CBigInt &E, const CBigInt &N);
+CBigInt MontgomeryModularPower(const CBigInt &M, const CBigInt &E, const CBigInt &N);
+bool MillerRabin(const CBigInt &n);
+bool IsPrimeNumber(const CBigInt &n);
 CBigInt GeneratePrime(int bits);
-
 
 #endif //__PRIME_H__

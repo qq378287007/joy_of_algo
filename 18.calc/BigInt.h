@@ -3,7 +3,7 @@
 
 #include <string>
 
-#define MAX_BI_LEN   256
+#define MAX_BI_LEN 256
 
 #define DEC 10
 #define HEX 16
@@ -16,7 +16,7 @@ class CBigInt
 public:
     CBigInt();
     ~CBigInt();
-    CBigInt(const CBigInt& value);
+    CBigInt(const CBigInt &value);
     CBigInt(__int64 value);
 
     int ToInt();
@@ -24,68 +24,67 @@ public:
     bool IsEven() const;
     CBigInt GetNegative() const;
 
-    const CBigInt& operator=(__int64 value);
-	const CBigInt& operator=(const CBigInt& value);
-    bool operator<(const CBigInt& value) const;
-    bool operator<=(const CBigInt& value) const;
-    bool operator==(const CBigInt& value) const;
-    bool operator!=(const CBigInt& value) const;
-    bool operator>(const CBigInt& value) const;
-    bool operator>=(const CBigInt& value) const;
+    const CBigInt &operator=(__int64 value);
+    const CBigInt &operator=(const CBigInt &value);
+    bool operator<(const CBigInt &value) const;
+    bool operator<=(const CBigInt &value) const;
+    bool operator==(const CBigInt &value) const;
+    bool operator!=(const CBigInt &value) const;
+    bool operator>(const CBigInt &value) const;
+    bool operator>=(const CBigInt &value) const;
 
-	CBigInt operator+(const CBigInt& value) const;
-	const CBigInt& operator+=(const CBigInt& value);
-	CBigInt operator-(const CBigInt& value) const;
-	const CBigInt& operator-=(const CBigInt& value);
-	CBigInt operator*(const CBigInt& value) const;
-	const CBigInt& operator*=(const CBigInt& value);
-	CBigInt operator/(const CBigInt& value) const;
-	const CBigInt& operator/=(const CBigInt& value);
-	CBigInt operator%(const CBigInt& value) const;
-	const CBigInt& operator%=(const CBigInt& value);
-	CBigInt operator^(const CBigInt& n) const;
-	const CBigInt& operator^=(const CBigInt& n);
-	CBigInt operator << (__int64 bits) const;
-	const CBigInt& operator <<=(__int64 bits);
-	CBigInt operator >> (__int64 bits) const;
-	const CBigInt& operator >>=(__int64 bits);
+    CBigInt operator+(const CBigInt &value) const;
+    const CBigInt &operator+=(const CBigInt &value);
+    CBigInt operator-(const CBigInt &value) const;
+    const CBigInt &operator-=(const CBigInt &value);
+    CBigInt operator*(const CBigInt &value) const;
+    const CBigInt &operator*=(const CBigInt &value);
+    CBigInt operator/(const CBigInt &value) const;
+    const CBigInt &operator/=(const CBigInt &value);
+    CBigInt operator%(const CBigInt &value) const;
+    const CBigInt &operator%=(const CBigInt &value);
+    CBigInt operator^(const CBigInt &n) const;
+    const CBigInt &operator^=(const CBigInt &n);
+    CBigInt operator<<(__int64 bits) const;
+    const CBigInt &operator<<=(__int64 bits);
+    CBigInt operator>>(__int64 bits) const;
+    const CBigInt &operator>>=(__int64 bits);
 
     bool TestBit(__int64 bits) const;
     __int64 GetTotalBits() const;
     void RemRight(unsigned int length);
     void TrimRight(unsigned int length);
-    /*Êı¾İ×ª»»½Ó¿Ú*/
-    void GetFromString(const char* str, unsigned int system=HEX);
-    void PutToString(std::string& str, unsigned int system=HEX);
+    /*æ•°æ®è½¬æ¢æ¥å£*/
+    void GetFromString(const char *str, unsigned int system = HEX);
+    void PutToString(std::string &str, unsigned int system = HEX);
     void GetLong(unsigned long *values, unsigned int count);
     int PutLong(unsigned long *values, unsigned int bufLen);
-	int  GetFromData(const char *pData, int nBytes);//·µ»ØÊµ¼ÊµÄÎ»Êı
-	int  PutToData(char *pBuffer, int nBufferBytes);//·µ»ØÊı¾İµÄ×Ö½ÚÊı
+    int GetFromData(const char *pData, int nBytes); // è¿”å›å®é™…çš„ä½æ•°
+    int PutToData(char *pBuffer, int nBufferBytes); // è¿”å›æ•°æ®çš„å­—èŠ‚æ•°
 
     static CBigInt GenRandomInteger(__int64 bits);
 
 protected:
     void ZeroData(unsigned int length);
-    void SetValue(const CBigInt& value);
+    void SetValue(const CBigInt &value);
     void SetValue(__int64 value);
-    int CompareNoSign(const CBigInt& value) const; 
-    static void Add(const CBigInt& value1, const CBigInt& value2, CBigInt& result);
-    static void Sub(const CBigInt& value1, const CBigInt& value2, CBigInt& result);
-    static void Mul(const CBigInt& value1, const CBigInt& value2, CBigInt& result);
-    static void Div(const CBigInt& value1, const CBigInt& value2, CBigInt& quotient, CBigInt& mod);
-    static void Mod(const CBigInt& value1, const CBigInt& value2, CBigInt& result);
-    static void Power(const CBigInt& value, const CBigInt& n, CBigInt& result);
-    static void ShiftLeft(const CBigInt& value, __int64 bits, CBigInt& result);
-    static void ShiftRight(const CBigInt& value, __int64 bits, CBigInt& result);
+    int CompareNoSign(const CBigInt &value) const;
+    static void Add(const CBigInt &value1, const CBigInt &value2, CBigInt &result);
+    static void Sub(const CBigInt &value1, const CBigInt &value2, CBigInt &result);
+    static void Mul(const CBigInt &value1, const CBigInt &value2, CBigInt &result);
+    static void Div(const CBigInt &value1, const CBigInt &value2, CBigInt &quotient, CBigInt &mod);
+    static void Mod(const CBigInt &value1, const CBigInt &value2, CBigInt &result);
+    static void Power(const CBigInt &value, const CBigInt &n, CBigInt &result);
+    static void ShiftLeft(const CBigInt &value, __int64 bits, CBigInt &result);
+    static void ShiftRight(const CBigInt &value, __int64 bits, CBigInt &result);
 
 public:
-    //·ûºÅÎ»£¬0±íÊ¾ÕıÊı£¬1±íÊ¾¸ºÊı
+    // ç¬¦å·ä½ï¼Œ0è¡¨ç¤ºæ­£æ•°ï¼Œ1è¡¨ç¤ºè´Ÿæ•°
     unsigned int m_Sign;
-    //´óÊıÔÚ0x100000000½øÖÆÏÂµÄÊı×ÖÎ»Êı    
+    // å¤§æ•°åœ¨0x100000000è¿›åˆ¶ä¸‹çš„æ•°å­—ä½æ•°
     unsigned int m_nLength;
-    //ÓÃÊı×é¼ÇÂ¼´óÊıÔÚ0x100000000½øÖÆÏÂÃ¿Ò»Î»µÄÖµ
+    // ç”¨æ•°ç»„è®°å½•å¤§æ•°åœ¨0x100000000è¿›åˆ¶ä¸‹æ¯ä¸€ä½çš„å€¼
     unsigned long m_ulValue[MAX_BI_LEN];
 };
-
 
 #endif //__BIG_INT_H__

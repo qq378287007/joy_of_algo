@@ -9,7 +9,7 @@ public:
 	CMD5Hash();
 	~CMD5Hash();
 	void Init();
-	void Update(const unsigned char *pbuf,int nLen);
+	void Update(const unsigned char *pbuf, int nLen);
 	void Final(unsigned char *pFinalDigest);
 
 private:
