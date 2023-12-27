@@ -1,7 +1,5 @@
-// calendar.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
+#include <cstdio>
+#include <cassert>
 
 const int MONTHES_FOR_YEAR = 12;
 const int DAYS_FOR_WEEK = 7;
@@ -9,84 +7,74 @@ const int DAYS_FOR_WEEK = 7;
 const int DAYS_OF_LEAP_YEAR = 366;
 const int DAYS_OF_NORMAL_YEAR = 365;
 
-int daysOfMonth[MONTHES_FOR_YEAR] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-char *nameOfMonth[MONTHES_FOR_YEAR] = { "January", "February", "March", "April", "May", 
-                                        "June", "July", "August", "September", "October", 
-                                        "November", "December" };
-char *nameOfWeek[DAYS_FOR_WEEK] = { "Sunday", "Monday", "Tuesday", "Wednesday", 
-                                    "Thursday", "Friday", "Saturday" };
+int daysOfMonth[MONTHES_FOR_YEAR] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+char *nameOfMonth[MONTHES_FOR_YEAR] = {
+    "January", "February", "March", "April", "May",
+    "June", "July", "August", "September", "October",
+    "November", "December"};
+char *nameOfWeek[DAYS_FOR_WEEK] = {
+    "Sunday", "Monday", "Tuesday", "Wednesday",
+    "Thursday", "Friday", "Saturday"};
 
-bool IsLeapYear(int year)
+inline bool IsLeapYear(int year)
 {
-    return ( (year % 4 == 0) && (year % 100 != 0) ) || (year % 400 == 0);
+    return ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
 }
 
-/*
-ÅĞ¶ÏÊÇ·ñÊÇÆôÓÃ¸ñÀïÀúÒÔºóµÄÈÕÆÚ
-1582Äê£¬ÂŞÂí½Ì»Ê½«1582Äê10ÔÂ4ÈÕÖ¸¶¨Îª1582Äê10ÔÂ15ÈÕ£¬´Ó´Ë·ÏÖ¹ÁË¿­Èö´óµÛÖÆ¶¨µÄÈåÂÔÀú£¬
-¸ÄÓÃ¸ñÀïÀú
-*/
+// åˆ¤æ–­æ˜¯å¦æ˜¯å¯ç”¨æ ¼é‡Œå†ä»¥åçš„æ—¥æœŸ
+// 1582å¹´ï¼Œç½—é©¬æ•™çš‡å°†1582å¹´10æœˆ4æ—¥æŒ‡å®šä¸º1582å¹´10æœˆ15æ—¥ï¼Œä»æ­¤åºŸæ­¢äº†å‡¯æ’’å¤§å¸åˆ¶å®šçš„å„’ç•¥å†ï¼Œæ”¹ç”¨æ ¼é‡Œå†
 bool IsGregorianDays(int year, int month, int day)
 {
-    if(year < 1582)
+    if (year < 1582)
         return false;
 
-    if(year == 1582)
+    if (year == 1582)
     {
-        if( (month < 10) || ((month == 10) && (day < 15)) )
+        if ((month < 10) || ((month == 10) && (day < 15)))
             return false;
     }
 
     return true;
 }
 
-/*¼ÆËãÒ»ÄêÖĞ¹ıÈ¥µÄÌìÊı£¬°üÀ¨Ö¸¶¨µÄÕâÒ»Ìì*/
+// è®¡ç®—ä¸€å¹´ä¸­è¿‡å»çš„å¤©æ•°ï¼ŒåŒ…æ‹¬æŒ‡å®šçš„è¿™ä¸€å¤©
 int CalcYearPassedDays(int year, int month, int day)
 {
     int passedDays = 0;
-    
-    int i;
-    for(i = 0; i < month - 1; i++)
-    {
+
+    for (int i = 0; i < month - 1; i++)
         passedDays += daysOfMonth[i];
-    }
 
     passedDays += day;
-    if((month > 2) && IsLeapYear(year))
+    if ((month > 2) && IsLeapYear(year))
         passedDays++;
 
     return passedDays;
 }
 
-/*¼ÆËãÒ»ÄêÖĞ»¹Ê£ÏÂµÄÌìÊı£¬²»°üÀ¨Ö¸¶¨µÄÕâÒ»Ìì*/
+// è®¡ç®—ä¸€å¹´ä¸­è¿˜å‰©ä¸‹çš„å¤©æ•°ï¼Œä¸åŒ…æ‹¬æŒ‡å®šçš„è¿™ä¸€å¤©
 int CalcYearRestDays(int year, int month, int day)
 {
     int leftDays = daysOfMonth[month - 1] - day;
-    
-    int i;
-    for(i = month; i < MONTHES_FOR_YEAR; i++)
-    {
-        leftDays += daysOfMonth[i];
-    }
 
-    if((month <= 2) && IsLeapYear(year))
+    for (int i = month; i < MONTHES_FOR_YEAR; i++)
+        leftDays += daysOfMonth[i];
+
+    if ((month <= 2) && IsLeapYear(year))
         leftDays++;
 
     return leftDays;
 }
 
-/*
-¼ÆËãyearsÄê1ÔÂ1ÈÕºÍyeareÄê1ÔÂ1ÈÕÖ®¼äµÄÌìÊı£¬
-°üÀ¨yearsÄê1ÔÂ1ÈÕ£¬µ«ÊÇ²»°üÀ¨yeareÄê1ÔÂ1ÈÕ
-*/
+// è®¡ç®—yearså¹´1æœˆ1æ—¥å’Œyeareå¹´1æœˆ1æ—¥ä¹‹é—´çš„å¤©æ•°ï¼Œ
+// åŒ…æ‹¬yearså¹´1æœˆ1æ—¥ï¼Œä½†æ˜¯ä¸åŒ…æ‹¬yeareå¹´1æœˆ1æ—¥
 int CalcYearsDays(int years, int yeare)
 {
     int days = 0;
 
-    int i;
-    for(i = years; i < yeare; i++)
+    for (int i = years; i < yeare; i++)
     {
-        if(IsLeapYear(i))
+        if (IsLeapYear(i))
             days += DAYS_OF_LEAP_YEAR;
         else
             days += DAYS_OF_NORMAL_YEAR;
@@ -95,29 +83,26 @@ int CalcYearsDays(int years, int yeare)
     return days;
 }
 
-
 int CalculateDays(int ys, int ms, int ds, int ye, int me, int de)
 {
     int days = CalcYearRestDays(ys, ms, ds);
 
-    if(ys != ye) /*²»ÊÇÍ¬Ò»ÄêµÄÈÕÆÚ*/
+    if (ys != ye) // ä¸æ˜¯åŒä¸€å¹´çš„æ—¥æœŸ
     {
-        if((ye - ys) >= 2) /*¼ä¸ô³¬¹ıÒ»Äê£¬Òª¼ÆËã¼ä¸ôµÄÕûÄêÊ±¼ä*/
-        {
+        if ((ye - ys) >= 2) // é—´éš”è¶…è¿‡ä¸€å¹´ï¼Œè¦è®¡ç®—é—´éš”çš„æ•´å¹´æ—¶é—´
             days += CalcYearsDays(ys + 1, ye);
-        }
+
         days += CalcYearPassedDays(ye, me, de);
     }
     else
     {
-        days = days - CalcYearRestDays(ye, me, de);
+        days -= CalcYearRestDays(ye, me, de);
     }
 
     return days;
 }
 
-
-//Î¬»ù°Ù¿ÆµÄ¹«Ê½
+// ç»´åŸºç™¾ç§‘çš„å…¬å¼
 double CalculateJulianDay(int year, int month, int day, int hour, int minute, double second)
 {
     int a = (14 - month) / 12;
@@ -125,14 +110,10 @@ double CalculateJulianDay(int year, int month, int day, int hour, int minute, do
     int m = month + 12 * a - 3;
 
     double jdn = day + (153 * m + 2) / 5 + 365 * y + y / 4;
-    if(IsGregorianDays(year, month, day))
-    {
+    if (IsGregorianDays(year, month, day))
         jdn = jdn - y / 100 + y / 400 - 32045.5;
-    }
     else
-    {
         jdn -= 32083.5;
-    }
 
     return jdn + hour / 24.0 + minute / 1440.0 + second / 86400.0;
 }
@@ -149,7 +130,7 @@ int TotalWeek(int year, int month, int day)
 {
     int d = CalcYearPassedDays(year, month, day);
     int y = year - 1;
-    int w = y * DAYS_OF_NORMAL_YEAR + y / 4 - y / 100 + y / 400 + d; 
+    int w = y * DAYS_OF_NORMAL_YEAR + y / 4 - y / 100 + y / 400 + d;
 
     return w % 7;
 }
@@ -158,8 +139,8 @@ int ZellerWeek(int year, int month, int day)
 {
     int m = month;
     int d = day;
-    
-    if(month <= 2) /*¶ÔĞ¡ÓÚ2µÄÔÂ·İ½øĞĞĞŞÕı*/
+
+    if (month <= 2) // å¯¹å°äº2çš„æœˆä»½è¿›è¡Œä¿®æ­£
     {
         year--;
         m = month + 12;
@@ -169,7 +150,7 @@ int ZellerWeek(int year, int month, int day)
     int c = year / 100;
 
     int w = (y + y / 4 + c / 4 - 2 * c + (13 * (m + 1) / 5) + d - 1) % 7;
-    if(w < 0) /*ĞŞÕı¼ÆËã½á¹ûÊÇ¸ºÊıµÄÇé¿ö*/
+    if (w < 0) // ä¿®æ­£è®¡ç®—ç»“æœæ˜¯è´Ÿæ•°çš„æƒ…å†µ
         w += 7;
 
     return w;
@@ -177,14 +158,12 @@ int ZellerWeek(int year, int month, int day)
 
 int GetDaysOfMonth(int year, int month)
 {
-    if((month < 1) || (month > 12))
+    if ((month < 1) || (month > 12))
         return 0;
 
     int days = daysOfMonth[month - 1];
-    if((month == 2) && IsLeapYear(year))
-    {
+    if ((month == 2) && IsLeapYear(year))
         days++;
-    }
 
     return days;
 }
@@ -203,23 +182,15 @@ void PrintMonthBanner(char *monthName)
 
 void PrintWeekBanner()
 {
-    int i;
-    for(i = 0; i < DAYS_FOR_WEEK; i++)
-    {
+    for (int i = 0; i < DAYS_FOR_WEEK; i++)
         printf("%-10s", nameOfWeek[i]);
-    }
     printf("\n");
 }
 
 void InsertRowSpace(int firstWeek)
 {
-    int count = firstWeek;
-
-    int i;
-    for(i = 0; i < count; i++)
-    {
+    for (int i = 0; i < firstWeek; i++)
         printf("          ");
-    }
 }
 
 void SetNextRowStart()
@@ -230,8 +201,8 @@ void SetNextRowStart()
 
 void PrintMonthCalendar(int year, int month)
 {
-    int days = GetDaysOfMonth(year, month); /*È·¶¨Õâ¸öÔÂµÄÌìÊı*/
-    if(days <= 0)
+    int days = GetDaysOfMonth(year, month); /*ç¡®å®šè¿™ä¸ªæœˆçš„å¤©æ•°*/
+    if (days <= 0)
         return;
 
     PrintMonthBanner(nameOfMonth[month - 1]);
@@ -239,15 +210,12 @@ void PrintMonthCalendar(int year, int month)
     int firstDayWeek = ZellerWeek(year, month, 1);
     InsertRowSpace(firstDayWeek);
     int week = firstDayWeek;
-    int i = 1;
-    while(i <= days)
+
+    for (int i = 1; i <= days; i++)
     {
         printf("%-10d", i);
-        if(week == 6) /*µ½Ò»ÖÜ½áÊø£¬ÇĞ»»µ½ÏÂÒ»ĞĞÊä³ö*/
-        {
+        if (week == 6) /*åˆ°ä¸€å‘¨ç»“æŸï¼Œåˆ‡æ¢åˆ°ä¸‹ä¸€è¡Œè¾“å‡º*/
             SetNextRowStart();
-        }
-        i++;
         week = (week + 1) % 7;
     }
 }
@@ -255,30 +223,12 @@ void PrintMonthCalendar(int year, int month)
 void PrintYearCalendar(int year)
 {
     PrintYearBanner(year);
-
-    int i;
-    for(i = 0; i < MONTHES_FOR_YEAR; i++)
+    for (int i = 0; i < MONTHES_FOR_YEAR; i++)
     {
         PrintMonthCalendar(year, i + 1);
         printf("\n");
     }
-
     printf("\n\n");
-}
-
-int main(int argc, char* argv[])
-{
-    int days1 = CalculateDays(1977, 3, 27, 2005, 5, 31);
-    int days2 = CalculateDays2(1977, 3, 27, 2005, 5, 31);
-
-    double jd31 = CalculateJulianDay(1986, 12, 25, 12, 0, 1); //2446790.0000115740
-    double jd32 = CalculateJulianDay(1996, 1, 1, 12, 0, 0); //2450084.0
-    double jd33 = CalculateJulianDay(1858, 11, 17, 0, 0, 0); //2400000.5
-    double jd34 = CalculateJulianDay(1979, 10, 1, 0, 0, 0); //2444174.5
-    double jd35 = CalculateJulianDay(-4712, 1, 1, 12, 0, 0); //0.0
-
-    PrintYearCalendar(2012);
-	return 0;
 }
 
 void testZellerWeek()
@@ -321,4 +271,19 @@ void testTotalWeek()
 
     week = TotalWeek(2009, 10, 1);
     assert(week == 4);
+}
+
+int main()
+{
+    int days1 = CalculateDays(1977, 3, 27, 2005, 5, 31);
+    int days2 = CalculateDays2(1977, 3, 27, 2005, 5, 31);
+
+    double jd31 = CalculateJulianDay(1986, 12, 25, 12, 0, 1); // 2446790.0000115740
+    double jd32 = CalculateJulianDay(1996, 1, 1, 12, 0, 0);   // 2450084.0
+    double jd33 = CalculateJulianDay(1858, 11, 17, 0, 0, 0);  // 2400000.5
+    double jd34 = CalculateJulianDay(1979, 10, 1, 0, 0, 0);   // 2444174.5
+    double jd35 = CalculateJulianDay(-4712, 1, 1, 12, 0, 0);  // 0.0
+
+    PrintYearCalendar(2012);
+    return 0;
 }
