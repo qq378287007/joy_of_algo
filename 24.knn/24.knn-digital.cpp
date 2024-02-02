@@ -5,61 +5,60 @@
 #include <vector>
 #include <cmath>
 #include <functional>
+using namespace std;
 
-//#include <filesystem>
 #include <experimental/filesystem>
-
-namespace std_fs = std::experimental::filesystem;
+namespace std_fs = experimental::filesystem;
 
 const int BMP_WIDTH = 32;
 const int BMP_HEIGHT = 32;
 const int NUM_COUNT = 10; // 0-9
 const int K = 9;
 
-const std::string FILE_PATH = "..\\";
+const string FILE_PATH = ".\\";
 
-typedef struct
+struct SampleVec
 {
     int cat;
     char vec[BMP_WIDTH * BMP_HEIGHT];
-} SampleVec;
+};
 
-typedef struct
+struct CatResult
 {
     double distance;
     int cat;
-} CatResult;
+};
 
-std::pair<bool, int> GetCategoryFromFileName(const std::string fileName)
+pair<bool, int> GetCategoryFromFileName(const string fileName)
 {
-    std::size_t pos = fileName.find('_');
-    if (pos == std::string::npos)
+    size_t pos = fileName.find('_');
+    if (pos == string::npos)
         return {false, 0};
 
     int cat = fileName[pos - 1] - '0';
     return {true, cat};
 }
 
-bool AppendToVec(SampleVec &vec, int row, std::string &sline)
+bool AppendToVec(SampleVec &vec, int row, string &sline)
 {
     if (sline.length() != BMP_WIDTH)
         return false;
 
     char *pvs = vec.vec + row * BMP_WIDTH;
-    for (std::size_t i = 0; i < sline.length(); i++)
+    for (size_t i = 0; i < sline.length(); i++)
         *pvs++ = sline[i] - '0';
     return true;
 }
 
-bool LoadFileToVec(const std::string fileName, SampleVec &vec)
+bool LoadFileToVec(const string &fileName, SampleVec &vec)
 {
-    std::ifstream file(fileName, std::ios::in);
+    ifstream file(fileName, ios::in);
     if (!file)
         return false;
 
     int row = 0;
-    std::string sline;
-    while (std::getline(file, sline))
+    string sline;
+    while (getline(file, sline))
     {
         if (!AppendToVec(vec, row, sline))
             break;
@@ -73,16 +72,16 @@ double ManhattanDustance(const SampleVec &vec1, const SampleVec &vec2)
 {
     double total = 0.0;
     for (int i = 0; i < BMP_WIDTH * BMP_HEIGHT; i++)
-        total += std::abs(vec1.vec[i] - vec2.vec[i]);
+        total += abs(vec1.vec[i] - vec2.vec[i]);
     return total;
 }
 
-bool LoadDataSet(const std::string filePath, std::vector<SampleVec> &dataSet)
+bool LoadDataSet(const string filePath, vector<SampleVec> &dataSet)
 {
     for (auto &p : std_fs::directory_iterator(filePath))
     {
-        std::string fileName = p.path().generic_string();
-        std::pair<bool, int> catrtn = GetCategoryFromFileName(fileName);
+        string fileName = p.path().generic_string();
+        pair<bool, int> catrtn = GetCategoryFromFileName(fileName);
         if (!catrtn.first)
             return false;
 
@@ -96,7 +95,7 @@ bool LoadDataSet(const std::string filePath, std::vector<SampleVec> &dataSet)
     return true;
 }
 
-int GetMaxCountCategory(const std::vector<int> &count)
+int GetMaxCountCategory(const vector<int> &count)
 {
     int mj = 0;
     for (int j = 1; j < NUM_COUNT; j++)
@@ -105,10 +104,10 @@ int GetMaxCountCategory(const std::vector<int> &count)
     return mj;
 }
 
-int Classify(const std::vector<SampleVec> &dataTrain, const SampleVec &vec)
+int Classify(const vector<SampleVec> &dataTrain, const SampleVec &vec)
 {
     int idx = 0;
-    std::vector<CatResult> cr(dataTrain.size());
+    vector<CatResult> cr(dataTrain.size());
     for (auto &vt : dataTrain)
     {
         cr[idx].cat = vt.cat;
@@ -117,9 +116,9 @@ int Classify(const std::vector<SampleVec> &dataTrain, const SampleVec &vec)
 
     auto lessCrPred = [](const CatResult &cr1, const CatResult &cr2) -> bool
     { return (cr1.distance < cr2.distance); };
-    std::sort(cr.begin(), cr.end(), lessCrPred);
+    sort(cr.begin(), cr.end(), lessCrPred);
 
-    std::vector<int> count(NUM_COUNT, 0);
+    vector<int> count(NUM_COUNT, 0);
     for (int i = 0; i < K; i++)
         count[cr[i].cat]++;
 
@@ -128,24 +127,24 @@ int Classify(const std::vector<SampleVec> &dataTrain, const SampleVec &vec)
 
 int main()
 {
-    const std::string trainFile = FILE_PATH + "traindata";
-    std::vector<SampleVec> dataTrain;
+    const string trainFile = FILE_PATH + "traindata";
+    vector<SampleVec> dataTrain;
     if (!LoadDataSet(trainFile, dataTrain))
     {
-        std::cout << "Fail to load trainning data file!" << std::endl;
-        return 0;
+        cout << "Fail to load trainning data file!" << endl;
+        return 1;
     }
 
-    const std::string testFile = FILE_PATH + "testdata";
-    std::vector<SampleVec> dataTest;
+    const string testFile = FILE_PATH + "testdata";
+    vector<SampleVec> dataTest;
     if (!LoadDataSet(testFile, dataTest))
     {
-        std::cout << "Fail to load test data file!" << std::endl;
-        return 0;
+        cout << "Fail to load test data file!" << endl;
+        return 1;
     }
 
-    std::vector<std::pair<int, int>> result(NUM_COUNT);
-    for (auto &v : dataTest)
+    vector<pair<int, int>> result(NUM_COUNT);
+    for (const SampleVec &v : dataTest)
     {
         result[v.cat].first++;
         int cat = Classify(dataTrain, v);
@@ -153,13 +152,14 @@ int main()
             result[v.cat].second++;
     }
 
-    for (std::size_t i = 0; i < result.size(); i++)
+    for (size_t i = 0; i < result.size(); i++)
     {
-        double rato = double(result[i].second) * 100.0 / result[i].first;
-        std::cout << "category : " << i << "  success : " << std::setprecision(4) << rato << std::endl;
+        double rato = 100.0 * result[i].second / result[i].first;
+        cout << "category : " << i << "  success : " << setprecision(4) << rato << endl;
     }
+
     return 0;
 }
 
-//g++ knn-digital.cpp -std=c++17 -lstdc++fs -o knn-digital 
-//g++ knn-digital.cpp -o knn-digital -std=c++11 -lstdc++fs
+// g++ 24.knn-digital.cpp -o 24.knn-digital -std=c++17 -L-lstdc++fs
+// g++ -std=c++11 24.knn-digital.cpp -o 24.knn-digital -lstdc++fs
