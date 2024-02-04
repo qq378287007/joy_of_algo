@@ -66,7 +66,7 @@ protected:
     void ZeroData();
     void SetValue(const CBigInt &value);
     void SetValue(__int64 value);
-    int CompareNoSign(const CBigInt &value) const;
+    static int CompareNoSign(const BigInt &left, const BigInt &right);
     static void Add(const CBigInt &value1, const CBigInt &value2, CBigInt &result);
     static void Sub(const CBigInt &value1, const CBigInt &value2, CBigInt &result);
     static void Mul(const CBigInt &value1, const CBigInt &value2, CBigInt &result);
