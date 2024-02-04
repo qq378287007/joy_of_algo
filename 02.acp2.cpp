@@ -2,29 +2,28 @@
 #include <stack>
 using namespace std;
 
-#if 1
 int max(int *values, int size)
 {
-    int mval = *values;
+    int mval = values[0];
     for (int i = 1; i < size; i++)
-    {
-        if (values[i] > mval)
+        if (mval < values[i])
             mval = values[i];
-    }
     return mval;
 }
 
 int Factorial(int n)
 {
+    if (n <= 1)
+        return 1;
+
     int value = 1;
-    for (int i = 1; i < n; i++)
+    for (int i = 2; i <= n; i++)
         value *= i;
     return value;
 }
-
 int Factorial2(int n)
 {
-    if (n == 0)
+    if (n <= 1)
         return 1;
     return n * Factorial2(n - 1);
 }
@@ -32,44 +31,45 @@ int Factorial2(int n)
 struct TNODE
 {
     int key;
-    TNODE *left;
-    TNODE *right;
+    TNODE *left{nullptr};
+    TNODE *right{nullptr};
 };
 bool FindTNode(TNODE *tr, int key)
 {
-    if (tr == NULL)
+    if (tr == nullptr)
         return false;
-    if (tr->key == key)
-        return true;
 
-    if (key < tr->key)
+    if (key == tr->key)
+        return true;
+    else if (key < tr->key)
         return FindTNode(tr->left, key);
     else
         return FindTNode(tr->right, key);
 }
-
 bool FindTNode2(TNODE *tr, int key)
 {
-    for (TNODE *curNode = tr; curNode != NULL;)
+    for (TNODE *curNode = tr; curNode != nullptr;)
     {
-        if (curNode->key == key)
+        if (key == curNode->key)
             return true;
-
-        if (key < curNode->key)
+        else if (key < curNode->key)
             curNode = curNode->left;
         else
             curNode = curNode->right;
     }
-
     return false;
 }
 
 int day_of_year(int year)
 {
-    static int days_per_year = 365;
-    if (((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0))
-        return days_per_year + 1;
-    return days_per_year;
+    if (year % 400 == 0)
+        return 366;
+    else if (year % 100 == 0)
+        return 365;
+    else if (year % 4 == 0)
+        return 366;
+    else
+        return 365;
 }
 
 /*
@@ -155,22 +155,19 @@ void BFS(Graph G, int v)
     }
 }
 */
-#endif
 
-bool IsLeftBrackets(string::value_type ch)
+bool IsLeftBrackets(char ch)
 {
     return ch == '(';
 }
-
-bool IsRightBrackets(string::value_type ch)
+bool IsRightBrackets(char ch)
 {
     return ch == ')';
 }
-
 bool IsMatchBrackets(const string &express)
 {
-    stack<string::value_type> epStk;
-    for (string::size_type i = 0; i < express.length(); i++)
+    stack<char> epStk;
+    for (size_t i = 0; i < express.length(); i++)
     {
         if (IsLeftBrackets(express[i]))
         {
@@ -183,7 +180,6 @@ bool IsMatchBrackets(const string &express)
             epStk.pop();
         }
     }
-
     return epStk.empty();
 }
 

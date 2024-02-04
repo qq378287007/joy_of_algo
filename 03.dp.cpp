@@ -7,11 +7,11 @@ const int MAX_STRING_LEN = 50;
 
 // #define min(a, b)  (((a) < (b)) ? (a) : (b))
 
-typedef struct
+ struct MEMO_RECORD
 {
     int distance;
     int refCount;
-} MEMO_RECORD;
+} ;
 
 MEMO_RECORD memo[MAX_STRING_LEN][MAX_STRING_LEN];
 

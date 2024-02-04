@@ -3,6 +3,7 @@
 #include <functional>
 #include <iostream>
 #include <cassert>
+#include <vector>
 using namespace std;
 
 // river_def
@@ -70,33 +71,6 @@ struct ItemState
     BOAT_LOCATION boat{LOCAL}; // LOCAL or REMOTE
     ACTION_NAME curAct{INVALID_ACTION_NAME};
 
-    /*
-        ItemState()
-        {
-            SetState(monster_count, monk_count, 0, 0, LOCAL);
-            curAct = INVALID_ACTION_NAME;
-        }
-        ItemState(const ItemState &state)
-        {
-            SetState(state.local_monster, state.local_monk, state.remote_monster, state.remote_monk, state.boat);
-            curAct = state.curAct;
-        }
-
-        ItemState &operator=(const ItemState &state)
-        {
-            SetState(state.local_monster, state.local_monk, state.remote_monster, state.remote_monk, state.boat);
-            curAct = state.curAct;
-            return *this;
-        }
-        void SetState(int lmonster, int lmonk, int rmonster, int rmonk, BOAT_LOCATION bl)
-        {
-            local_monster = lmonster;
-            local_monk = lmonk;
-            remote_monster = rmonster;
-            remote_monk = rmonk;
-            boat = bl;
-        }
-    */
     inline bool IsSameState(const ItemState &state) const
     {
         return (local_monster == state.local_monster &&
@@ -133,6 +107,12 @@ struct ItemState
         if (tmp_local_monk < 0 || tmp_local_monk > monk_count)
             return false;
 
+        if (tmp_local_monk > 0 && tmp_local_monster > tmp_local_monk)
+            return false;
+
+        if (tmp_local_monk < 3 && tmp_local_monster < tmp_local_monk)
+            return false;
+
         return true;
     }
 
@@ -167,13 +147,13 @@ inline bool IsSameItemState(const ItemState &state1, const ItemState &state2)
 
 inline bool IsProcessedState(const deque<ItemState> &states, const ItemState &newState)
 {
-    return find_if(states.cbegin(), states.cend(), bind(&IsSameItemState, newState, placeholders::_1)) != states.cend();
+    return find_if(states.cbegin(), states.cend(), bind(IsSameItemState, newState, placeholders::_1)) != states.cend();
 }
 
 void PrintResult(const deque<ItemState> &states)
 {
     cout << "Find Result : " << endl;
-    for_each(states.cbegin(), states.cend(), mem_fn(&ItemState::PrintStates));
+    for_each(states.cbegin(), states.cend(), mem_fn(ItemState::PrintStates));
     cout << endl;
 }
 
@@ -189,33 +169,34 @@ ItemState MakeActionNewState(const ItemState &curState, const ACTION_EFFECTION &
     return newState;
 }
 
-void SearchState(deque<ItemState> &states);
-void SearchStateOnNewAction(deque<ItemState> &states, const ItemState &current, const ACTION_EFFECTION &ae)
+void SearchState(deque<ItemState> &states, vector<deque<ItemState>> &vs);
+void SearchStateOnNewAction(deque<ItemState> &states, const ItemState &current, const ACTION_EFFECTION &ae, vector<deque<ItemState>> &vs)
 {
     if (current.CanTakeAction(ae))
     {
         ItemState next = MakeActionNewState(current, ae);
-        if (next.IsValidState() && !IsProcessedState(states, next))
+        if (!IsProcessedState(states, next))
         {
             states.push_back(next);
-            SearchState(states);
+            SearchState(states, vs);
             states.pop_back();
         }
     }
 }
 
-void SearchState(deque<ItemState> &states)
+void SearchState(deque<ItemState> &states, vector<deque<ItemState>> &vs)
 {
     const ItemState &current = states.back(); // 每次都从当前状态开始
     if (current.IsFinalState())
     {
-        PrintResult(states);
+        // PrintResult(states);
+        vs.emplace_back(states);
         return;
     }
 
     // 尝试用10种动作分别与当前状态组合
     for (int i = 0; i < sizeof(actEffect) / sizeof(actEffect[0]); i++)
-        SearchStateOnNewAction(states, current, actEffect[i]);
+        SearchStateOnNewAction(states, current, actEffect[i], vs);
 }
 
 int main()
@@ -223,7 +204,18 @@ int main()
     ItemState init;
     deque<ItemState> states;
     states.push_back(init);
-    SearchState(states);
+
+    vector<deque<ItemState>> vs;
+    SearchState(states, vs);
+    int min_num = 999;
+    for (deque<ItemState> &v : vs)
+    {
+        PrintResult(v);
+        if (min_num > v.size())
+            min_num = v.size();
+    }
+    cout << vs.size() << endl; // 过河可能情况
+    cout << min_num << endl;   // 最少过河次数
 
     assert(states.size() == 1); // 穷举结束后states应该还是只有一个初始状态
 

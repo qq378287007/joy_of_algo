@@ -6,11 +6,11 @@
 #include <vector>
 using namespace std;
 
-typedef struct
+struct WORD_DICT
 {
     int max_len;
     map<int, vector<wstring>> words;
-} WORD_DICT;
+};
 
 void InitDict(WORD_DICT &dict)
 {
