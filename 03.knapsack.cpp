@@ -166,7 +166,7 @@ void DPAlgo2(const vector<OBJECT2> &objs, const int V)
     vector<vector<int>> f(N + 1, vector<int>(V + 1, 0)); // 背包容量为V，装载前N个物品的最大价值
     for (int i = 1; i <= N; i++)
         for (int j = objs[i - 1].C; j <= V; j++)
-            f[i][j] = max(f[i - 1][j], f[i - 1][j - objs[i - 1].C] + objs[i - 1].W);//不装载第N个物品（容量不变），或者装载第N个物品（容量改变，价值改变）
+            f[i][j] = max(f[i - 1][j], f[i - 1][j - objs[i - 1].C] + objs[i - 1].W); // 不装载第N个物品（容量不变），或者装载第N个物品（容量改变，价值改变）
 
     int result = f[N][V];
     if (result > 0)
@@ -175,7 +175,8 @@ void DPAlgo2(const vector<OBJECT2> &objs, const int V)
         int j = V;
         for (int i = N; i >= 1; i--)
         {
-            if (f[i][j] == (f[i - 1][j - objs[i - 1].C] + objs[i - 1].W))
+            // if (f[i][j] == (f[i - 1][j - objs[i - 1].C] + objs[i - 1].W))
+            if (f[i][j] != f[i - 1][j])
             {
                 cout << i << ": "
                      << "w=" << objs[i - 1].W << ", c=" << objs[i - 1].C << endl;
@@ -201,8 +202,9 @@ int main()
 #endif
 
 #if 1
-    vector<OBJECT2> objs{{10, 35}, {40, 30}, {30, 60}, {50, 50}, {35, 40}, {40, 10}, {30, 25}}; // 可选物品（重量+价值）
-    const int V = 150;                                                                          // 背包容量
+    // vector<OBJECT2> objs{{10, 35}, {40, 30}, {30, 60}, {50, 50}, {35, 40}, {40, 10}, {30, 25}}; // 可选物品（重量+价值）
+    vector<OBJECT2> objs{{35, 10}, {30, 40}, {60, 30}, {50, 50}, {40, 35}, {10, 40}, {5, 30}}; // 可选物品（重量+价值）
+    const int V = 150;                                                                         // 背包容量
     DPAlgo2(objs, V);
 #endif
     return 0;

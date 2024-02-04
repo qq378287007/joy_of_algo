@@ -1,89 +1,63 @@
 #include <cassert>
 #include <iostream>
+#include <string>
+#include <vector>
 using namespace std;
 
-typedef struct
+/*
+Google方程式
+WWWDOT-GOOGLE=DOTCOM
+每个字符代表0~9的数字（不重复）
+WWWDOT、GOOGLE和DOTCOM，都是合法数字，不以0开头
+*/
+struct CHAR_ITEM
 {
-    char c;
-    int value;
-    bool leading;
-} CHAR_ITEM;
+    char c;       // 字符
+    int value;    // 数字
+    bool leading; // 是否是数字最高位（最高位不为0）
+};
 
-typedef struct
+struct CHAR_VALUE
 {
-    bool used;
-    int value;
-} CHAR_VALUE;
+    bool used; // 是否被使用
+    int value; // 数字
+};
 
-const int max_number_count = 10;
-const int max_char_count = 9;
-
-typedef void (*CharListReadyFuncPtr)(CHAR_ITEM ci[max_char_count]);
-
-CHAR_ITEM *GetCharItem(CHAR_ITEM ci[max_char_count], char c)
+bool GetCharItem(const vector<CHAR_ITEM> &ci, char c, CHAR_ITEM &i)
 {
-    for (int i = 0; i < max_char_count; ++i)
-        if (ci[i].c == c)
-            return &ci[i];
-    return NULL;
+    for (const CHAR_ITEM &item : ci)
+    {
+        if (item.c == c)
+        {
+            i = item;
+            return true;
+        }
+    }
+    return false;
 }
 
-int MakeIntegerValue(CHAR_ITEM ci[max_char_count], const char *chars)
+int MakeIntegerValue(const vector<CHAR_ITEM> &ci, const string &chars)
 {
-    assert(chars);
+    CHAR_ITEM i;
     int value = 0;
-    for (char *p = (char *)chars; *p != 0; p++)
+    for (char p : chars)
     {
-        CHAR_ITEM *char_item = GetCharItem(ci, *p);
-        if (char_item == NULL)
+        if (!GetCharItem(ci, p, i))
             return 0;
-        value = value * 10 + char_item->value;
+        value = value * 10 + i.value;
     }
     return value;
 }
-
-bool IsValueValid(CHAR_ITEM ii, CHAR_VALUE vv)
+//static int total = 0;//总组合次数
+void OnCharListReady(const vector<CHAR_ITEM> &ci)
 {
-    if (vv.used)
-        return false;
-
-    if (ii.leading && vv.value == 0)
-        return false;
-
-    return true;
-}
-
-void SearchingResult(CHAR_ITEM ci[max_char_count], CHAR_VALUE cv[max_number_count], int index, CharListReadyFuncPtr callback)
-{
-    if (index == max_char_count)
-    {
-        callback(ci);
-        return;
-    }
-
-    for (int i = 0; i < max_number_count; ++i)
-    {
-        if (IsValueValid(ci[index], cv[i]))
-        {
-            cv[i].used = true; /*set used sign*/
-            ci[index].value = cv[i].value;
-            SearchingResult(ci, cv, index + 1, callback);
-            cv[i].used = false; /*clear used sign*/
-        }
-    }
-}
-
-static int total = 0;
-void OnCharListReady(CHAR_ITEM ci[max_char_count])
-{
-    total++;
-    const char *minuend = "WWWDOT";
-    const char *subtrahend = "GOOGLE";
-    const char *diff = "DOTCOM";
-
-    // char *minuend    = "AAB";
-    // char *subtrahend = "BBC";
-    // char *diff       = "CCD";
+    //total++;
+    const string &minuend = "WWWDOT";
+    const string &subtrahend = "GOOGLE";
+    const string &diff = "DOTCOM";
+    //  const string &minuend    = "AAB";
+    //  const string &subtrahend = "BBC";
+    //  const string &diff       = "CCD";
 
     int m = MakeIntegerValue(ci, minuend);
     int s = MakeIntegerValue(ci, subtrahend);
@@ -92,12 +66,44 @@ void OnCharListReady(CHAR_ITEM ci[max_char_count])
         cout << m << " - " << s << " = " << d << endl;
 }
 
+bool IsValueValid(const CHAR_ITEM &ii, const CHAR_VALUE &vv)
+{
+    if (ii.leading && vv.value == 0)
+        return false;
+
+    if (vv.used)
+        return false;
+
+    return true;
+}
+
+using CharListReadyFuncPtr = void (*)(const vector<CHAR_ITEM> &ci);
+void SearchingResult(vector<CHAR_ITEM> &ci, vector<CHAR_VALUE> &cv, int index, CharListReadyFuncPtr callback)
+{
+    if (index == ci.size())
+    {
+        callback(ci);
+        return;
+    }
+
+    for (int i = 0; i < cv.size(); ++i)
+    {
+        if (IsValueValid(ci[index], cv[i]))
+        {
+            cv[i].used = true; // set used sign
+            ci[index].value = cv[i].value;
+            SearchingResult(ci, cv, index + 1, callback);
+            cv[i].used = false; // clear used sign
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
-    CHAR_ITEM char_item[max_char_count] = {{'W', -1, true}, {'D', -1, true}, {'O', -1, false}, {'T', -1, false}, {'G', -1, true}, {'L', -1, false}, {'E', -1, false}, {'C', -1, false}, {'M', -1, false}};
-    // CHAR_ITEM char_item[max_char_count] = { {'A', -1, true}, {'B', -1, true}, {'C', -1, true}, {'D', -1, false} };
+    vector<CHAR_ITEM> char_item{{'W', -1, true}, {'D', -1, true}, {'O', -1, false}, {'T', -1, false}, {'G', -1, true}, {'L', -1, false}, {'E', -1, false}, {'C', -1, false}, {'M', -1, false}};
+    // vector<CHAR_ITEM> char_item{ {'A', -1, true}, {'B', -1, true}, {'C', -1, true}, {'D', -1, false} };
 
-    CHAR_VALUE char_val[max_number_count] = {{false, 0}, {false, 1}, {false, 2}, {false, 3}, {false, 4}, {false, 5}, {false, 6}, {false, 7}, {false, 8}, {false, 9}};
+    vector<CHAR_VALUE> char_val{{false, 0}, {false, 1}, {false, 2}, {false, 3}, {false, 4}, {false, 5}, {false, 6}, {false, 7}, {false, 8}, {false, 9}};
 
     SearchingResult(char_item, char_val, 0, OnCharListReady);
 
