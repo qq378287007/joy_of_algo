@@ -2,16 +2,9 @@
 #include <stack>
 #include <vector>
 #include <climits>
+#include <memory>
+#include <iostream>
 using namespace std;
-
-int max(const vector<int> &values)
-{
-    int mval = INT_MIN;
-    for (int value : values)
-        if (mval < value)
-            mval = value;
-    return mval;
-}
 
 int Factorial(int n)
 {
@@ -30,13 +23,40 @@ int Factorial2(int n)
     return n * Factorial2(n - 1);
 }
 
+int max(const vector<int> &values)
+{
+    int mval = INT_MIN;
+    for (int value : values)
+        if (mval < value)
+            mval = value;
+    return mval;
+}
+
+struct Cell
+{
+    bool fixed;
+};
+struct Game
+{
+    Cell cells[3][3];
+};
+void func(Game *game)
+{
+    for (int i = 0; i < 9; i++) // 单循环遍历二维数组
+    {
+        int row = i / 3;
+        int col = i % 3;
+        game->cells[row][col].fixed = false;
+    }
+}
+
 struct TNODE
 {
     int key;
     TNODE *left{nullptr};
     TNODE *right{nullptr};
 };
-bool FindTNode(TNODE *tr, int key)
+bool FindTNode(TNODE *tr, int key) // 递归实现二叉树查找，尾递归
 {
     if (tr == nullptr)
         return false;
@@ -48,7 +68,7 @@ bool FindTNode(TNODE *tr, int key)
     else
         return FindTNode(tr->right, key);
 }
-bool FindTNode2(TNODE *tr, int key)
+bool FindTNode2(TNODE *tr, int key) // 尾递归转循环形式
 {
     TNODE *curNode = tr;
     while (curNode != nullptr)
@@ -75,69 +95,150 @@ int day_of_year(int year)
         return 365;
 }
 
-/*
-typedef bool(*ProcessNextFuncPtr)(const ItemState& current, ItemState& next);
+enum Action
+{
+    FARMER_GO,
+    FARMER_BACK,
+};
+struct ItemState
+{
+};
+bool proceeFarmerGo(const ItemState &current, ItemState &next) { return true; }
+bool proceeFarmerBack(const ItemState &current, ItemState &next) { return true; }
+using ProcessNextFuncPtr = bool (*)(const ItemState &current, ItemState &next);
 struct ActionProcess
 {
     Action act;
-    ProcessNextFuncPtr processFunct;
+    ProcessNextFuncPtr processFunc;
 };
-ActionProcess actMap[] = {
+vector<ActionProcess> actMap{
     {FARMER_GO, proceeFarmerGo},
     {FARMER_BACK, proceeFarmerBack},
-    ...
 };
-
-
-ItemState next;
-for (int i = 0; i < sizeof(actMap) / sizeof(actMap[0]); i++)
+ItemState func(Action action, const ItemState &current)
 {
-    if (actMap[i].act == action)
+    ItemState next;
+    for (ActionProcess cur_ap : actMap)
     {
-        actMap[i].processFunc(current, next);
-        break;
+        if (cur_ap.act == action)
+        {
+            cur_ap.processFunc(current, next);
+            break;
+        }
     }
+    return next;
 }
-*/
 
+// values取值范围[1, 100]
+// 统计次数
 #define MAX_NUMBER_RANGE 100
-void CountNumbers(int *values, int count)
+void CountNumbers(const vector<int> &values)
 {
     int numCount[MAX_NUMBER_RANGE] = {0};
-    for (int i = 0; i < count; i++)
-        numCount[values[i] - 1]++;
+    for (int value : values)
+        numCount[value - 1]++;
 }
 
-/*
-//单循环遍历3*3网格
-for (int i = 0; i < 9; i++)
+bool IsMatchBrackets(const string &express)
 {
-    int row = i / 3;
-    int col = i % 3;
-    game->cells[row][col].fixed = false;
+    stack<char> epStk;
+    for (size_t i = 0; i < express.length(); i++)
+    {
+        if ('(' == express[i])
+        {
+            epStk.push(express[i]);
+        }
+        else if (')' == express[i])
+        {
+            if (epStk.empty())
+                return false;
+            epStk.pop();
+        }
+    }
+    return epStk.empty();
 }
-*/
 
+struct Point
+{
+    int ind;
+    bool visited{false};
+    vector<shared_ptr<Point>> next;
+    Point(int i) : ind(i) {}
+};
+
+struct Graph
+{
+    vector<shared_ptr<Point>> points;
+
+    Graph()
+    {
+        for (int i = 0; i < 6; i++)
+            points.emplace_back(make_shared<Point>(i));
+
+        points[0]->next.emplace_back(points[1]);
+        points[0]->next.emplace_back(points[2]);
+        points[0]->next.emplace_back(points[3]);
+        points[0]->next.emplace_back(points[4]);
+
+        points[1]->next.emplace_back(points[0]);
+        points[1]->next.emplace_back(points[2]);
+        points[1]->next.emplace_back(points[5]);
+
+        points[2]->next.emplace_back(points[0]);
+        points[2]->next.emplace_back(points[1]);
+        points[2]->next.emplace_back(points[3]);
+        points[2]->next.emplace_back(points[5]);
+
+        points[3]->next.emplace_back(points[0]);
+        points[3]->next.emplace_back(points[2]);
+        points[3]->next.emplace_back(points[4]);
+        points[3]->next.emplace_back(points[5]);
+
+        points[4]->next.emplace_back(points[0]);
+        points[4]->next.emplace_back(points[3]);
+        points[4]->next.emplace_back(points[5]);
+
+        points[5]->next.emplace_back(points[1]);
+        points[5]->next.emplace_back(points[2]);
+        points[5]->next.emplace_back(points[3]);
+        points[5]->next.emplace_back(points[4]);
+    }
+};
+
+void VisitFunction(const shared_ptr<Point> &v)
+{
+    cout << v->ind << endl;
+}
+
+void DFS(const shared_ptr<Point> &v)
+{
+    if (v->visited)
+        return;
+
+    VisitFunction(v); // 访问v点;
+    v->visited = true;
+
+    for (const shared_ptr<Point> &vi : v->next) // 遍历v的所有邻接点
+        DFS(vi);
+}
+void GraphTravel(Graph g)
+{
+    for (const shared_ptr<Point> &v : g.points) // 遍历G的所有顶点
+        DFS(v);
+}
 /*
 // 从第v个顶点出发递归地深度优先遍历图G
 void DFS(Graph G, int v)
 {
     VisitFunction(v);            // 访问v点;
     for_each(vi : v的所有邻接点) // 遍历v的所有邻接点
-    {
         if (vi没有被访问过)
             DFS(G, vi);
-    }
 }
-*/
-
-/*
 void GraphTravel(Graph G)
 {
     for_each(v : G的所有顶点) // 遍历G的所有顶点
-    {
         DFS(G, v);
-    }
 }
 */
 /*
@@ -159,56 +260,13 @@ void BFS(Graph G, int v)
 }
 */
 
-bool IsLeftBrackets(char ch)
-{
-    return ch == '(';
-}
-bool IsRightBrackets(char ch)
-{
-    return ch == ')';
-}
-bool IsMatchBrackets(const string &express)
-{
-    stack<char> epStk;
-    for (size_t i = 0; i < express.length(); i++)
-    {
-        if (IsLeftBrackets(express[i]))
-        {
-            epStk.push(express[i]);
-        }
-        else if (IsRightBrackets(express[i]))
-        {
-            if (epStk.empty())
-                return false;
-            epStk.pop();
-        }
-    }
-    return epStk.empty();
-}
-
-/*
-void someFunction
-{
-double kg = gScale * 102.1 + 55.3;
-NotifyModule1(kk);
-double kl1 = kg / l_mask;
-NotifyModule2(kl1);
-double kl2 = kg * 1.25 / l_mask;
-NotifyModule2(kl2);
-
-double globalKerp = GetGlobalKerp();
-NotifyGlobalModule(globalKerp);
-double localKrep = globalKerp / localMask;
-NotifyLocalModule(localKrep);
-double localKrepBoost = globalKerp * 1.25 / localMask;
-NotifyLocalModule(localKrepBoost);
-}
-*/
-
 int main()
 {
     bool rtn = IsMatchBrackets(string("((()))"));
     rtn = IsMatchBrackets(string("(44(55)fdg( )  df)"));
     rtn = IsMatchBrackets(string("(ss(ddf))ff)"));
+
+    Graph g;
+    GraphTravel(g);
     return 0;
 }
