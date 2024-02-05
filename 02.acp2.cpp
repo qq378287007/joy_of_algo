@@ -1,13 +1,15 @@
 #include <string>
 #include <stack>
+#include <vector>
+#include <climits>
 using namespace std;
 
-int max(int *values, int size)
+int max(const vector<int> &values)
 {
-    int mval = values[0];
-    for (int i = 1; i < size; i++)
-        if (mval < values[i])
-            mval = values[i];
+    int mval = INT_MIN;
+    for (int value : values)
+        if (mval < value)
+            mval = value;
     return mval;
 }
 
@@ -48,7 +50,8 @@ bool FindTNode(TNODE *tr, int key)
 }
 bool FindTNode2(TNODE *tr, int key)
 {
-    for (TNODE *curNode = tr; curNode != nullptr;)
+    TNODE *curNode = tr;
+    while (curNode != nullptr)
     {
         if (key == curNode->key)
             return true;

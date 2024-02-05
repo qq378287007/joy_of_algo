@@ -1,41 +1,37 @@
 #include <vector>
 #include <cmath>
+#include <cfloat>
 using namespace std;
 
-class Point
+struct Point
 {
-public:
-    double x;
-    double y;
+    double x, y;
 };
 
-class Vector
+struct Vector
 {
-public:
-    double x;
-    double y;
+    double x, y;
 
-public:
     Vector(double m_x, double m_y) : x(m_x), y(m_y) {}
     Vector(const Point &p) : x(p.x), y(p.y) {}
 
-public:
     Vector GetNormal()
     {
         Vector v = GetPerpendicular();
         v.Normalize();
         return v;
     }
+    double DotProduct(const Vector &v) const
+    {
+        return x * v.x + y * v.y;
+    }
+
     static Vector MakeEdge(const Point &p1, const Point &p2)
     {
         Vector u(p1);
         Vector v(p2);
         return u.Subtarct(v);
-        // return Vector(p1.x-p2.x,p1.y-p2.y);
-    }
-    double DotProduct(const Vector &v) const
-    {
-        return x * v.x + y * v.y;
+        // return Vector(p1.x - p2.x, p1.y - p2.y);
     }
 
 protected:
@@ -58,12 +54,9 @@ protected:
     }
 };
 
-class Projection
+struct Projection
 {
-    double min;
-    double max;
-
-public:
+    double min, max;
     Projection(double m_min, double m_max) : min(m_min), max(m_max) {}
     bool IsOverlap(const Projection &p) const
     {
@@ -71,12 +64,12 @@ public:
     }
 };
 
-class Polygon
+struct Polygon
 {
     vector<Point> vertex;
 
 public:
-    void GetAxes(vector<Vector> &axes) const
+    void GetAxes(vector<Vector> &axs) const
     {
         const size_t n = vertex.size();
         for (size_t i = 0; i < n; i++)
@@ -84,22 +77,20 @@ public:
             Point p1 = vertex[i];
             Point p2 = vertex[(i + 1) % n];
             Vector edge = Vector::MakeEdge(p1, p2);
-            axes.push_back(edge.GetNormal());
+            axs.push_back(edge.GetNormal());
         }
     }
-    Projection GetProject(const Vector &axes) const
+    Projection GetProject(const Vector &axs) const
     {
-        // double min = RANGE_MAX;
-        // double max = RANGE_MIN;
-        double min;
-        double max;
+        double min = DBL_MAX;
+        double max = -DBL_MAX;
         for (const Point &i : vertex)
         {
             Vector p(i);
-            double prj = p.DotProduct(axes);
-            if (prj < min)
+            double prj = p.DotProduct(axs);
+            if (min > prj)
                 min = prj;
-            else if (prj > max)
+            if (max < prj)
                 max = prj;
         }
         return Projection(min, max);
@@ -108,13 +99,13 @@ public:
 
 bool CollisionTest(const Polygon &pa, const Polygon &pb)
 {
-    vector<Vector> axess;
-    pa.GetAxes(axess);
-    pb.GetAxes(axess);
-    for (const Vector &axes : axess)
+    vector<Vector> axs;
+    pa.GetAxes(axs);
+    pb.GetAxes(axs);
+    for (const Vector &ax : axs)
     {
-        Projection pa_prj = pa.GetProject(axes);
-        Projection pb_prj = pb.GetProject(axes);
+        Projection pa_prj = pa.GetProject(ax);
+        Projection pb_prj = pb.GetProject(ax);
         if (!pa_prj.IsOverlap(pb_prj))
             return false;
     }
