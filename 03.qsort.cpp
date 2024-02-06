@@ -2,6 +2,7 @@
 #include <iostream>
 using namespace std;
 
+//分治法
 /*
 T DivideAndConquer(P)
 {

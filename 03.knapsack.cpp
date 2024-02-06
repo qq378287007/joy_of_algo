@@ -2,6 +2,9 @@
 #include <vector>
 using namespace std;
 
+// 0-1背包问题
+// N件物体和1个承重为C的背包，每件物体的重量和价值分别为weight[i]和price[i]
+// 选择几件物体装入背包，在满足背包承重前提下，价值总和最高
 struct OBJECT
 {
     int weight;
@@ -116,71 +119,31 @@ void GreedyAlgo(KNAPSACK_PROBLEM &problem, SELECT_POLICY spFunc)
 }
 
 // 动态规划
-const int N = 7;           // 物品数量
-const int V = 150;         // 背包容量
-int f[N + 1][V + 1] = {0}; // 背包容量为V+1，装载N+1个物品的最大价值
-int Package(int *W, int *C, int N, int V)
-{
-    for (int i = 1; i <= N; i++)
-    {
-        for (int j = C[i]; j <= V; j++)
-        {
-            f[i][j] = max(f[i - 1][j], f[i - 1][j - C[i]] + W[i]);
-            // cout << "f[" << i << "][" << j << "]=" << f[i][j] << endl;
-        }
-        // cout << endl;
-    }
-    return f[N][V];
-}
-void DPAlgo()
-{
-    int W[8] = {0, 10, 40, 30, 50, 35, 40, 30}; // 物品权重
-    int C[8] = {0, 35, 30, 60, 50, 40, 10, 25}; // 物品大小
-    int result = Package(W, C, N, V);
-    if (result > 0)
-    {
-        cout << "the opt value: " << result << endl;
-        int j = V;
-        for (int i = N; i > 0; i--)
-        {
-            if (f[i][j] == (f[i - 1][j - C[i]] + W[i]))
-            {
-                cout << i << ": "
-                     << "w=" << W[i] << ", c=" << C[i] << endl;
-                j -= C[i];
-            }
-        }
-    }
-    else
-        cout << "can not find the opt value" << endl;
-}
-
 struct OBJECT2
 {
-    int C; // 重量
-    int W; // 价值
+    int weight; // 重量
+    int price;  // 价值
 };
 void DPAlgo2(const vector<OBJECT2> &objs, const int V)
 {
-    const int N = objs.size();                           // 物品数量
-    vector<vector<int>> f(N + 1, vector<int>(V + 1, 0)); // 背包容量为V，装载前N个物品的最大价值
+    const int N = objs.size(); // 物品数量
+    vector<vector<int>> f(N + 1, vector<int>(V + 1, 0));
     for (int i = 1; i <= N; i++)
-        for (int j = objs[i - 1].C; j <= V; j++)
-            f[i][j] = max(f[i - 1][j], f[i - 1][j - objs[i - 1].C] + objs[i - 1].W); // 不装载第N个物品（容量不变），或者装载第N个物品（容量改变，价值改变）
+        for (int j = objs[i - 1].weight; j <= V; j++)
+            f[i][j] = max(f[i - 1][j], f[i - 1][j - objs[i - 1].weight] + objs[i - 1].price); // 不装载第i个物品（容量不变），或者装载第i个物品（容量改变，价值改变）
 
-    int result = f[N][V];
+    int result = f[N][V]; // 背包容量为V，装载前N个物品的最大价值
     if (result > 0)
     {
-        cout << "the opt value: " << result << endl;
+        cout << "the max price: " << result << endl;
         int j = V;
         for (int i = N; i >= 1; i--)
         {
-            // if (f[i][j] == (f[i - 1][j - objs[i - 1].C] + objs[i - 1].W))
-            if (f[i][j] != f[i - 1][j])
+            if (f[i][j] != f[i - 1][j]) // 装载了第N件物品
             {
                 cout << i << ": "
-                     << "w=" << objs[i - 1].W << ", c=" << objs[i - 1].C << endl;
-                j -= objs[i - 1].C;
+                     << "weight=" << objs[i - 1].weight << ", price=" << objs[i - 1].price << endl;
+                j -= objs[i - 1].weight;
             }
         }
     }
@@ -202,7 +165,6 @@ int main()
 #endif
 
 #if 1
-    // vector<OBJECT2> objs{{10, 35}, {40, 30}, {30, 60}, {50, 50}, {35, 40}, {40, 10}, {30, 25}}; // 可选物品（重量+价值）
     vector<OBJECT2> objs{{35, 10}, {30, 40}, {60, 30}, {50, 50}, {40, 35}, {10, 40}, {5, 30}}; // 可选物品（重量+价值）
     const int V = 150;                                                                         // 背包容量
     DPAlgo2(objs, V);

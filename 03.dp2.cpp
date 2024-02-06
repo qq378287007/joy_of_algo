@@ -3,6 +3,38 @@
 #include <vector>
 using namespace std;
 
+// 贪婪法
+// 局部最优解，不一定是全局最优解
+
+// 1, 5, 10, 25类型硬币，凑出n元最少硬币数量
+// vector<int> coins = {25, 20, 5, 1};
+// int amount = 41;
+int coinNumber(const vector<int> &coins, int amount)
+{
+    if (amount < 0)
+        return -1;
+
+    int num = 0;
+    while (amount > 0)
+    {
+        bool found = false;
+        for (int coin : coins)
+        {
+            if (coin <= amount)
+            {
+                amount -= coin;
+                num++;
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            return -1;
+    }
+
+    return num;
+}
+
 int EditDistance1(const string &src, const string &dest)
 {
     const int src_len = src.length();

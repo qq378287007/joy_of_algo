@@ -1,6 +1,7 @@
 #include <string>
 #include <stack>
 #include <vector>
+#include <queue>
 #include <climits>
 #include <memory>
 #include <iostream>
@@ -164,101 +165,86 @@ struct Point
     bool visited{false};
     vector<shared_ptr<Point>> next;
     Point(int i) : ind(i) {}
+
+    inline void addNext(const shared_ptr<Point> &p)
+    {
+        next.emplace_back(p);
+    }
+    bool VisitFunction()
+    {
+        if (visited)
+            return true;
+
+        cout << ind << endl;
+        visited = true;
+
+        return false;
+    }
 };
 
 struct Graph
 {
-    vector<shared_ptr<Point>> points;
+    vector<shared_ptr<Point>> vp;
 
     Graph()
     {
-        for (int i = 0; i < 6; i++)
-            points.emplace_back(make_shared<Point>(i));
+        shared_ptr<Point> p0(new Point(0));
+        shared_ptr<Point> p1(new Point(1));
+        shared_ptr<Point> p2(new Point(2));
+        shared_ptr<Point> p3(new Point(3));
+        shared_ptr<Point> p4(new Point(4));
+        shared_ptr<Point> p5(new Point(5));
 
-        points[0]->next.emplace_back(points[1]);
-        points[0]->next.emplace_back(points[2]);
-        points[0]->next.emplace_back(points[3]);
-        points[0]->next.emplace_back(points[4]);
+        p0->addNext(p1);
+        p0->addNext(p2);
+        p0->addNext(p3);
 
-        points[1]->next.emplace_back(points[0]);
-        points[1]->next.emplace_back(points[2]);
-        points[1]->next.emplace_back(points[5]);
+        p1->addNext(p4);
 
-        points[2]->next.emplace_back(points[0]);
-        points[2]->next.emplace_back(points[1]);
-        points[2]->next.emplace_back(points[3]);
-        points[2]->next.emplace_back(points[5]);
+        p2->addNext(p4);
+        p2->addNext(p5);
 
-        points[3]->next.emplace_back(points[0]);
-        points[3]->next.emplace_back(points[2]);
-        points[3]->next.emplace_back(points[4]);
-        points[3]->next.emplace_back(points[5]);
+        p3->addNext(p5);
 
-        points[4]->next.emplace_back(points[0]);
-        points[4]->next.emplace_back(points[3]);
-        points[4]->next.emplace_back(points[5]);
-
-        points[5]->next.emplace_back(points[1]);
-        points[5]->next.emplace_back(points[2]);
-        points[5]->next.emplace_back(points[3]);
-        points[5]->next.emplace_back(points[4]);
+        vp.emplace_back(p0);
     }
 };
 
-void VisitFunction(const shared_ptr<Point> &v)
+void DFS(shared_ptr<Point> &v) // 深度优先遍历
 {
-    cout << v->ind << endl;
-}
-
-void DFS(const shared_ptr<Point> &v)
-{
-    if (v->visited)
+    if (v->VisitFunction()) // 访问v点
         return;
-
-    VisitFunction(v); // 访问v点;
-    v->visited = true;
-
-    for (const shared_ptr<Point> &vi : v->next) // 遍历v的所有邻接点
+    for (shared_ptr<Point> &vi : v->next) // 遍历v的所有邻接点
         DFS(vi);
 }
-void GraphTravel(Graph g)
+void GraphTravel(Graph &g)
 {
-    for (const shared_ptr<Point> &v : g.points) // 遍历G的所有顶点
+    for (shared_ptr<Point> &v : g.vp) // 遍历G的所有根顶点
         DFS(v);
 }
-/*
-// 从第v个顶点出发递归地深度优先遍历图G
-void DFS(Graph G, int v)
+
+void BFS(const shared_ptr<Point> &v) // 广度优先遍历
 {
-    VisitFunction(v);            // 访问v点;
-    for_each(vi : v的所有邻接点) // 遍历v的所有邻接点
-        if (vi没有被访问过)
-            DFS(G, vi);
-}
-void GraphTravel(Graph G)
-{
-    for_each(v : G的所有顶点) // 遍历G的所有顶点
-        DFS(G, v);
-}
-*/
-/*
-void BFS(Graph G, int v)
-{
-    for_each(vi : v的所有邻接点) // 遍历v的所有邻接点
+    queue<shared_ptr<Point>> q;
+
+    q.push(v);
+    while (!q.empty())
     {
-        if (vi没有被访问过)
-        {
-            VisitFunction(vi); // 访问v点;
-            EnQueue(Q, vi);    // vi入队列
-        }
-    }
-    while (!QueueEmpty(Q))
-    {
-        DeQueue(Q, u); // 队头元素出队并置为u
-        BFS(G, u);
+        shared_ptr<Point> vi = q.front();
+        q.pop();
+
+        vi->VisitFunction(); // 访问v点
+
+        for (const shared_ptr<Point> &vvi : vi->next) // 遍历v的所有邻接点
+            if (vvi->visited == false)
+                q.push(vvi);
     }
 }
-*/
+void GraphTravel2(Graph &g)
+{
+    for (shared_ptr<Point> &v : g.vp) // 遍历G的所有根顶点
+        BFS(v);
+}
 
 int main()
 {
@@ -268,5 +254,8 @@ int main()
 
     Graph g;
     GraphTravel(g);
+
+    Graph g2;
+    GraphTravel2(g2);
     return 0;
 }
