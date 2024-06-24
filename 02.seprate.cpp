@@ -3,19 +3,23 @@
 #include <cfloat>
 using namespace std;
 
+// 分离轴定理：两个物体存在一条轴上的投影不重叠，则这两个物体就不相交。
+
 struct Point
 {
-    double x, y;
+    double x;
+    double y;
 };
 
 struct Vector
 {
-    double x, y;
+    double x;
+    double y;
 
     Vector(double m_x, double m_y) : x(m_x), y(m_y) {}
     Vector(const Point &p) : x(p.x), y(p.y) {}
 
-    Vector GetNormal()
+    Vector GetNormal() const
     {
         Vector v = GetPerpendicular();
         v.Normalize();
@@ -30,8 +34,8 @@ struct Vector
     {
         Vector u(p1);
         Vector v(p2);
-        return u.Subtarct(v);
-        // return Vector(p1.x - p2.x, p1.y - p2.y);
+        return v.Subtarct(u);
+        // return Vector(p2.x - p1.x, p2.y - p1.y);
     }
 
 protected:
@@ -41,7 +45,7 @@ protected:
     }
     Vector GetPerpendicular() const
     {
-        return Vector(-y, x);
+        return Vector(-y, x);// 向量左转90度的垂直向量
     }
     void Normalize()
     {
@@ -56,7 +60,8 @@ protected:
 
 struct Projection
 {
-    double min, max;
+    double min;
+    double max;
     Projection(double m_min, double m_max) : min(m_min), max(m_max) {}
     bool IsOverlap(const Projection &p) const
     {
@@ -68,7 +73,6 @@ struct Polygon
 {
     vector<Point> vertex;
 
-public:
     void GetAxes(vector<Vector> &axs) const
     {
         const size_t n = vertex.size();

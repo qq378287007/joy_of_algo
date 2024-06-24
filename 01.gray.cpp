@@ -28,18 +28,24 @@ protected:
 	HWND m_hWnd;
 };
 
+// 彩色图像转成灰度图像
+// 平均值法
 const double one_third = 1.0 / 3.0;
 BYTE RGB2GrayAvg(BYTE r, BYTE g, BYTE b)
 {
 	return BYTE(r * one_third + g * one_third + b * one_third + 0.5);
 }
 
+// 最大值法
 BYTE RGB2GrayMax(BYTE r, BYTE g, BYTE b)
 {
 	BYTE rg = r > g ? r : g;
 	return b > rg ? b : rg;
 }
 
+// （经验）权重法
+// 人眼对RGB颜色分量的敏感度
+// 心理学灰度公式
 BYTE RGB2GrayWeight(BYTE r, BYTE g, BYTE b)
 {
 	return BYTE(r * 0.3 + g * 0.59 + b * 0.11 + 0.5);
@@ -145,4 +151,4 @@ int main()
 	return 0;
 }
 
-// set name=01.gray&&g++ %name%.cpp libeasyx.a -o %name%.exe -I. -L. -lFreeImage&&%name%.exe
+// set name=01.gray&& g++ %name%.cpp libeasyx.a -o %name%.exe -I. -L. -lFreeImage && %name%.exe

@@ -4,7 +4,7 @@ CBigInt EuclidGcd(const CBigInt &a, const CBigInt &b)
 {
     CBigInt smaller = (a > b) ? b : a;
     CBigInt biger = (a > b) ? a : b;
-
+    /*
     biger = biger % smaller;
     while (biger != 0)
     {
@@ -12,6 +12,13 @@ CBigInt EuclidGcd(const CBigInt &a, const CBigInt &b)
         biger = smaller;
         smaller = tmp;
         biger = biger % smaller;
+    }
+    */
+    CBigInt tmp;
+    while ((tmp = biger % smaller) != 0)
+    {
+        biger = smaller;
+        smaller = tmp;
     }
 
     return smaller;
